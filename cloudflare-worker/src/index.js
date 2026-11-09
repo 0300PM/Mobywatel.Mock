@@ -21,7 +21,6 @@ const TEXT_MODELS = [
   '@cf/meta/llama-3.1-8b-instruct',
   '@cf/mistralai/mistral-small-3.1-24b-instruct',
   '@cf/qwen/qwen2.5-coder-32b-instruct',
-  '@cf/google/gemma-3-12b-it',
   '@cf/meta/llama-4-scout-17b-16e-instruct',
 ];
 
@@ -37,11 +36,13 @@ function authorised(request, env) {
   return header === 'Bearer ' + env.WORKER_TOKEN;
 }
 
-/** Wiadomości OpenAI -> prompt tekstowy (Workers AI nie ma natywnego tool-callingu). */
+/** Wiadomości OpenAI -> prompt tekstowy (Workers AI nie ma natywnego tool-callingu).
+ *  Wywołania narzędzi z historii sklejamy w jedną wiadomość assistant, żeby modele nie dostawały
+ *  dwóch wiadomości assistant pod rząd (część modeli wtedy odrzuca rozmowę). */
 function toMessages(messages) {
   const out = [];
   for (const message of messages) {
-    const role = message.role;
+    const role = message.role === 'tool' ? 'user' : message.role;   // wynik narzędzia jest danymi, nie odpowiedzią asystenta
     if (role === 'tool') {
       out.push({ role: 'user', content: '[wynik narzędzia ' + (message.tool_call_id || '') + '] ' + String(message.content ?? '') });
       continue;
@@ -56,7 +57,16 @@ function toMessages(messages) {
     }
     out.push({ role: role === 'system' ? 'system' : role === 'assistant' ? 'assistant' : 'user', content: String(content ?? '') });
   }
-  return out;
+  const merged = [];
+  for (const message of out) {
+    const previous = merged[merged.length - 1];
+    if (previous && previous.role === message.role && message.role !== 'system') {
+      previous.content = (previous.content ? previous.content + '\n' : '') + message.content;
+      continue;
+    }
+    merged.push({ ...message });
+  }
+  return merged;
 }
 
 async function chat(request, env) {
@@ -69,6 +79,8 @@ async function chat(request, env) {
   const model = body.model || env.DEFAULT_MODEL || TEXT_MODELS[0];
   const messages = toMessages(Array.isArray(body.messages) ? body.messages : []);
   if (!messages.length) return json({ error: { message: 'Brak wiadomości.' } }, 400);
+  if (!messages.some((message) => message.role === 'user' && message.content.trim()))
+    return json({ error: { message: 'Brak wiadomości użytkownika.' } }, 400);
 
   const payload = {
     messages,

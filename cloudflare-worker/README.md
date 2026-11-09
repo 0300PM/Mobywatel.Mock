@@ -76,12 +76,19 @@ https://mobywatels-workers-ai.<twoja-subdomena>.workers.dev/v1/models
 - `401` → dobrze, jeśli ustawiłeś `WORKER_TOKEN` (worker wymaga nagłówka),
 - `400 No route` / `404` → to nie jest adres workera.
 
+Bez nagłówka `Authorization` worker zawsze odpowie `401` — to nie znaczy, że nie działa. Sprawdzenie z kluczem:
+
+```bash
+curl -i https://mobywatels-workers-ai.<twoja-subdomena>.workers.dev/v1/models \
+  -H "Authorization: Bearer <WORKER_TOKEN>"
+```
+
 ## Krok 4 — wpisz adres do `.env`
 
 ```dotenv
 PROVIDER=workers
 CLOUDFLARE_WORKERS_URL=https://mobywatels-workers-ai.<twoja-subdomena>.workers.dev/v1
-CLOUDFLARE_WORKERS_TOKEN=            # tylko jeśli ustawiłeś WORKER_TOKEN w kroku 2
+CLOUDFLARE_WORKERS_TOKEN=<ten sam ciąg co sekret WORKER_TOKEN w kroku 2>
 CLOUDFLARE_WORKERS_MODEL=@cf/meta/llama-3.3-70b-instruct-fp8-fast
 CLOUDFLARE_WORKERS_TIMEOUT=120
 ```
@@ -104,6 +111,22 @@ ma pokazać `PROVIDER=workers`. Jeśli na porcie 8790 działa jeszcze inny konte
 **Pomoc i bezpieczeństwo → Model LM Studio → Sprawdź połączenie i pokaż modele**. Przy `PROVIDER=workers` ta karta
 pokazuje modele z workera. Wybierz model i wyślij wiadomość. Błędy mówią teraz wprost o workerze, np.
 „Worker Cloudflare odrzucił dostęp. Sprawdź CLOUDFLARE_WORKERS_TOKEN”.
+
+## Diagnostyka „Nie udało się połączyć z asystentem AI”
+
+Front pokazuje ten komunikat przy każdym błędzie `/api/agent`, więc nie mówi, co zawiodło. Kolejność sprawdzania:
+
+1. `docker exec mobywatels-mobywatel-1 env | grep -E 'PROVIDER|CLOUDFLARE'` — musi być `PROVIDER=workers` i pełny
+   `CLOUDFLARE_WORKERS_URL` z `/v1`. Zmiana w `.env` wymaga `docker compose up -d --build`.
+2. `curl -s http://127.0.0.1:8790/api/health` — `"agent": true` i `"provider": "workers"`.
+3. `curl -s -X POST http://127.0.0.1:8790/api/agent -H 'Content-Type: application/json' \
+   -d '{"messages":[{"role":"user","content":"test"}]}'` — zwraca `messages` i `events`. Gdy zwraca `{"error": …}`,
+   ten sam tekst zobaczysz w aplikacji.
+4. `curl -s http://127.0.0.1:8790/api/lmstudio/models` — lista modeli prosto z workera.
+
+Najczęstsze przyczyny: brak `CLOUDFLARE_WORKERS_TOKEN` przy ustawionym sekrecie `WORKER_TOKEN` (worker zwraca `401`),
+literówka w `CLOUDFLARE_WORKERS_URL` i model wybrany w aplikacji, którego konto nie ma w planie (worker zwraca `403`
+z komunikatem „not available on the Workers Free plan”). Po każdej zmianie w `.env` restart kontenera.
 
 ## Powrót do LM Studio
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Serwer prototypu: pliki statyczne z ../mockup + API agenta, rozpoznawania mowy i syntezy mowy.
 Uruchomienie: python3 server.py [port]   (domyślnie 8790)"""
-import base64, json, os, re, sys, time, uuid, threading, urllib.request, urllib.error, traceback, zlib
+import base64, inspect, json, os, re, sys, time, uuid, threading, urllib.request, urllib.error, traceback, zlib
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -16,6 +16,8 @@ TTS_CACHE = {}
 BLOKADA = os.path.join(HERE, 'BLOKADA')
 ODDAJ = 'Oddaj klucz'
 def zablokowane(): return os.path.exists(BLOKADA)
+WOLNO_PISAC = os.environ.get('MOB_TYLKO_ODCZYT', '').lower() not in ('1', 'true', 'yes')   # Vercel: dysk funkcji jest tylko do odczytu
+HOST = os.environ.get('HOST') or '127.0.0.1'
 def k(name):
     if name == 'workers':   # PROVIDER=workers: token do workera Cloudflare czytamy wyłącznie ze środowiska serwera
         return 'env' if not zablokowane() and agent.workers_ready() else None
@@ -35,6 +37,7 @@ def k(name):
     return KEYS[name]
 
 def log(x):
+    if not WOLNO_PISAC: return   # Vercel: nie ma gdzie pisać logu (dysk funkcji jest tylko do odczytu)
     x = dict(x, ts=time.strftime('%Y-%m-%d %H:%M:%S'))
     with _lock:
         with open(LOG, 'a', encoding='utf-8') as f: f.write(json.dumps(x, ensure_ascii=False) + '\n')
@@ -253,13 +256,32 @@ def tts(text, lang='pl'):
 
 class H(SimpleHTTPRequestHandler):
     def __init__(self, *a, **kw): super().__init__(*a, directory=ROOT, **kw)
+    def send_response(self, code, message=None):
+        if hasattr(self.wfile, 'czesci'):   # tryb WSGI (Vercel): nagłówki i treść idą do listy, nie do gniazda
+            self.status = '%d %s' % (code, self.responses.get(code, ('',))[0] if message is None else message)
+            self.naglowki = []
+            return
+        return super().send_response(code, message)
+    def send_header(self, keyword, value):
+        if hasattr(self.wfile, 'czesci'):
+            self.naglowki.append((keyword, str(value)))
+            return
+        return super().send_header(keyword, value)
+    def end_headers(self):
+        if hasattr(self.wfile, 'czesci'): return   # tryb WSGI: nic nie wysyłamy do gniazda
+        return super().end_headers()
     def handle(self):
         try: super().handle()
         except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError): pass
+    def handle_one_request(self):
+        if not hasattr(self.wfile, 'czesci'): return super().handle_one_request()   # tryb WSGI: żądanie podaje _Cien, nie gniazdo
+        self.raw_requestline = self.rfile.readline(65537)
+        if not self.raw_requestline: self.close_connection = True; return
+        if not self.parse_request(): return
+        metoda = getattr(self, 'do_' + self.command, None)
+        if metoda is None: return self.send_error(501, 'Unsupported method (%r)' % self.command)
+        metoda()
     def log_message(self, *a): pass
-    def end_headers(self):
-        if not self.path.startswith(('/api/', '/v1/')): self.send_header('Cache-Control', 'no-cache')
-        super().end_headers()
     def js(self, obj, code=200):
         b = json.dumps(obj, ensure_ascii=False).encode()
         self.send_response(code); self.send_header('Content-Type', 'application/json; charset=utf-8'); self.send_header('Content-Length', str(len(b))); self.send_header('Cache-Control', 'no-store'); self.end_headers(); self.wfile.write(b)
@@ -572,12 +594,52 @@ class H(SimpleHTTPRequestHandler):
         except Exception as e:
             log(dict(t='err', path=p, msg=str(e), tb=traceback.format_exc()[-800:])); self.js(dict(error=str(e)), 500)
 
+class _Wy:
+    """Strumień wyjściowy zamiast gniazda: zapamiętuje treść odpowiedzi."""
+    def __init__(self, czesci): self.czesci = czesci
+    def write(self, b): self.czesci.append(bytes(b))
+    def flush(self): pass
+
+# Żądanie WSGI podane w kształcie, jakiego oczekuje H (strumienie, metoda, ścieżka, nagłówki).
+# Dołączenie H: ten sam kod obsługuje gniazdo (Docker) i funkcję (Vercel), bez drugiej implementacji API.
+class _Cien(H):
+    def __init__(self, rfile, wfile, environ):
+        self.rfile, self.wfile = rfile, wfile
+        self.directory = ROOT   # pliki statyczne z mockup/, jak w H
+        self.close_connection = True
+        self.command = environ.get('REQUEST_METHOD', 'GET')
+        droga = environ.get('RAW_URI') or environ.get('PATH_INFO') or '/'
+        zapytanie = environ.get('QUERY_STRING') or ''
+        self.path = droga + ('?' + zapytanie if zapytanie else '')
+        self.request_version = environ.get('SERVER_PROTOCOL', 'HTTP/1.1')
+        self.headers = {k[5:].replace('_', '-').title(): v for k, v in environ.items() if k.startswith('HTTP_')}
+        if environ.get('CONTENT_TYPE'): self.headers['Content-Type'] = environ['CONTENT_TYPE']
+        if environ.get('CONTENT_LENGTH'): self.headers['Content-Length'] = environ['CONTENT_LENGTH']
+        self.naglowki, self.status = [], '200 OK'
+
+def _wsgi(h):
+    """H (serwer HTTP na gniazdach) -> aplikacja WSGI: na Vercelu działa ten sam kod."""
+    import io
+
+    def aplikacja(environ, start_response):
+        czesci = []
+        zrzut = environ['wsgi.input'].read()
+        cien = _Cien(io.BytesIO(b''), _Wy(czesci), environ)
+        # parse_request oczekuje linii żądania na strumieniu: składamy ją z danych WSGI, treść już jest w cien.rfile.
+        cien.rfile = io.BytesIO(('%s %s HTTP/1.0\r\nContent-Type: application/json\r\nContent-Length: %d\r\n\r\n' % (cien.command, cien.path, len(zrzut))).encode() + zrzut)
+        H.handle_one_request(cien)   # parse_request + do_GET/do_POST, jak na gnieździe
+        start_response(cien.status, cien.naglowki)
+        return czesci
+    return aplikacja
+
 if __name__ == '__main__':
     port = int(sys.argv[1]) if len(sys.argv) > 1 else int(os.environ.get('PORT') or 8790)
-    host = os.environ.get('HOST') or '127.0.0.1'
     try:
         import wiedza; threading.Thread(target=wiedza._wczytaj, daemon=True).start()   # baza kart gov.pl wczytuje się w tle (kilka sekund)
     except Exception as e: print('wiedza:', e)
-    srv = ThreadingHTTPServer((host, port), H)
-    print('mObywatel: http://%s:%d  (pliki: %s)' % ('127.0.0.1' if host in ('0.0.0.0', '::') else host, port, ROOT), flush=True)
+    srv = ThreadingHTTPServer((HOST, port), H)
+    print('mObywatel: http://%s:%d  (pliki: %s)' % ('127.0.0.1' if HOST in ('0.0.0.0', '::') else HOST, port, ROOT), flush=True)
     srv.serve_forever()
+
+# Vercel (api/index.py) importuje ten plik i podaje `app` do WSGI. Serwer HTTP i Docker działają jak dotąd.
+app = _wsgi(H)

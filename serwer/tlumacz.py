@@ -14,7 +14,8 @@ JEZYKI = {
     'uk': ('Ukrainian', 'Українська', 'uk'),
 }
 KAT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'i18n')
-os.makedirs(KAT, exist_ok=True)
+WOLNO_PISAC = os.environ.get('MOB_TYLKO_ODCZYT', '').lower() not in ('1', 'true', 'yes')
+if WOLNO_PISAC: os.makedirs(KAT, exist_ok=True)
 NUM = re.compile(r'\d+(?:[.,:/]\d+)*')
 LITERA = re.compile(r'[^\W\d_]', re.U)
 _lock = threading.Lock()
@@ -51,6 +52,7 @@ def _zapisz(lang):
         dysk = json.load(open(p, encoding='utf-8'))
         for k_, v in dysk.items(): _cache[lang].setdefault(k_, v)
     except Exception: pass
+    if not WOLNO_PISAC: return   # dysk tylko do odczytu (Vercel): tłumaczenie zostaje w pamięci procesu
     with open(tmp, 'w', encoding='utf-8') as f: json.dump(_cache[lang], f, ensure_ascii=False, indent=0, sort_keys=True)
     os.replace(tmp, p)
     try: _mtime[lang] = os.path.getmtime(p)
@@ -59,6 +61,7 @@ def zrodla():
     try: return set(json.load(open(os.path.join(KAT, '_zrodla.json'), encoding='utf-8')))
     except Exception: return set()
 def _dodaj_zrodla(xs):
+    if not WOLNO_PISAC: return   # rejestr braków zostaje w pamięci (Vercel: dysk funkcji jest tylko do odczytu)
     with _lock:
         z = zrodla(); n = len(z); z |= set(xs)
         if len(z) != n: json.dump(sorted(z), open(os.path.join(KAT, '_zrodla.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=0)

@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<script src="i18n.js?v=6"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#f2f3f7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>mObywatel</title>
+<link rel="icon" href="assets/icon-mobywatel.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tailwind.generated.css?v=1">
+<link rel="stylesheet" href="style.css?v=26">
+<link rel="stylesheet" href="modules.css?v=2">
+<link rel="stylesheet" href="safety.css?v=1">
+</head>
+<body class="tw:antialiased">
+<div class="phone" id="app">
+  <div id="appStatus" class="visually-hidden" role="status" aria-live="polite"></div>
+  <h1 class="visually-hidden">mObywatel — prototyp</h1>
+  <div class="island" aria-hidden="true"></div>
+  <div class="status" aria-hidden="true"><span id="clock">20:10</span><span class="sig"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx=".8"/><rect x="4.6" y="4.8" width="3" height="6.2" rx=".8"/><rect x="9.2" y="2.4" width="3" height="8.6" rx=".8"/><rect x="13.8" y="0" width="3" height="11" rx=".8"/></svg><svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><path d="M8 2.2c2.3 0 4.4.9 6 2.4l1.1-1.2A10.3 10.3 0 0 0 8 .5 10.3 10.3 0 0 0 .9 3.4L2 4.6a8.6 8.6 0 0 1 6-2.4Zm0 3.4c1.4 0 2.6.5 3.6 1.4l1.1-1.2A6.9 6.9 0 0 0 8 3.9a6.9 6.9 0 0 0-4.7 1.9L4.4 7A5.2 5.2 0 0 1 8 5.6Zm0 3.3a1.6 1.6 0 0 1 1.2.5L8 10.6 6.8 9.4A1.6 1.6 0 0 1 8 8.9Z"/></svg><i class="bat"></i></span></div>
+
+  <header class="top" id="top">
+    <button class="home" id="homeBtn" aria-label="Ekran główny"><img class="emblem" src="assets/icon-mobywatel.svg" alt=""></button>
+    <span class="sp"></span>
+    <button class="ico chatonly" id="histBtn" aria-label="Historia rozmów" aria-haspopup="dialog" aria-expanded="false" aria-controls="hmenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 12a7.8 7.8 0 1 0 2.3-5.5"/><path d="M4 4.6v3.6h3.6"/><path d="M12 8.2V12l2.7 1.7"/></svg><span class="hc" id="histCount" hidden></span></button>
+    <button class="ico chatonly" id="newBtn" aria-label="Nowa rozmowa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 4.5h-5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5"/><path d="M17.7 3.8a1.9 1.9 0 0 1 2.7 2.7l-7.6 7.6-3.4.7.7-3.4z"/></svg></button>
+    <button class="ico" id="qrBtn" aria-label="Potwierdź swoje dane: zeskanuj znak mObywatela odbiorcy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8V6a2.5 2.5 0 0 1 2.5-2.5h2M16 3.5h2A2.5 2.5 0 0 1 20.5 6v2M20.5 16v2a2.5 2.5 0 0 1-2.5 2.5h-2M8 20.5H6A2.5 2.5 0 0 1 3.5 18v-2"/><path d="M8 10h7.5l-2.2-2.2M16 14H8.5l2.2 2.2"/></svg></button>
+    <button class="ico" id="mailBtn" aria-label="Skrzynka, 1 nowa wiadomość"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.5 7.5 7.5 5.5 7.5-5.5"/></svg><span class="dot"></span></button>
+    <button class="ico" id="bellBtn" aria-label="Powiadomienia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 1.5H5zM10 20.5a2 2 0 0 0 4 0"/></svg></button>
+  </header>
+
+  <button class="title" id="title" aria-haspopup="dialog" aria-expanded="false" aria-controls="lmenu">Dokumenty<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 9.5 5.5 5.5 5.5-5.5"/></svg></button>
+  <div class="lmenu" id="lmenu" inert><div class="scrim"></div><div class="panel" role="dialog" aria-modal="true" aria-label="Układ dokumentów i osoba"><button class="menu-back" id="menuBack" lang="pl" data-t="0" type="button">Wstecz</button><div class="mh">Układ dokumentów</div><div class="ml"></div><div class="mh">Osoba w pokazie</div><div class="mo"></div></div></div>
+
+  <div class="hmenu" id="hmenu" inert><div class="scrim"></div><div class="panel" role="dialog" aria-modal="true" aria-label="Historia rozmów"><div class="hh"><button id="historyBack" class="menu-back" lang="pl" data-t="0" type="button">Wstecz</button><span>Rozmowy</span><button id="hnew" type="button">+ Nowa rozmowa</button></div><div class="hl" id="hlist" data-t="0"></div></div></div>
+
+  <main class="home-content" id="homeContent" aria-label="Dokumenty i przypomnienia">
+  <div class="home-features" id="homeFeatures" lang="pl" data-t="0">
+    <section class="home-access" aria-labelledby="homeAccessTitle">
+      <button type="button" class="home-feature-main" id="openAccess">
+        <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="4.5" r="2"/><path d="M4 8.5c5 1.5 11 1.5 16 0M12 9.5v5m0 0-4 6m4-6 4 6"/></svg></span>
+        <span class="feature-copy"><strong id="homeAccessTitle">Ułatwienia dostępu</strong><small>Większy tekst, kontrast i wygodniejsza obsługa</small></span>
+        <span class="feature-arrow" aria-hidden="true">›</span>
+      </button>
+      <div class="home-profile-row"><label for="homeSenior">Dla seniora <small id="homeSeniorState">Wyłączone</small></label><input id="homeSenior" class="switch" type="checkbox" role="switch" aria-describedby="homeSeniorState"></div>
+    </section>
+    <button type="button" class="home-feature-main safety-home-link" id="openSafety" aria-haspopup="dialog" aria-controls="safetyPanel">
+      <span class="feature-icon safety-feature-icon" aria-hidden="true">!</span>
+      <span class="feature-copy"><strong id="safetyHomeTitle">Bezpieczny Obywatel</strong><small id="safetyHomeSummary">Instrukcje kryzysowe, pomoc i plecak ewakuacyjny</small></span><span class="feature-arrow" aria-hidden="true">›</span>
+    </button>
+    <button type="button" class="home-feature-main home-map-link" id="openMap">
+      <span class="feature-icon map-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s6.5-5.7 6.5-11a6.5 6.5 0 1 0-13 0c0 5.3 6.5 11 6.5 11Z"/><circle cx="12" cy="10" r="2.2"/></svg></span>
+      <span class="feature-copy"><strong>Mapa placówek</strong><small>Urząd, apteka, przychodnia i inne miejsca</small></span><span class="feature-arrow" aria-hidden="true">›</span>
+    </button>
+    <details class="more-services module-services"><summary>Więcej funkcji</summary><p>Moduły demonstracyjne. Szczegóły prywatności i ograniczeń są opisane przed użyciem.</p><div><button type="button" id="openLetterModule">Tłumacz pism urzędowych</button><button type="button" id="openFamilyModule">Bezpieczne centrum rodzinne</button></div></details>
+    <section class="senior-tasks" aria-labelledby="seniorTasksTitle">
+      <div class="senior-heading"><span>NA SKRÓTY</span><h2 id="seniorTasksTitle">Co chcesz zrobić?</h2><p>Wybierz jedną z możliwości.</p></div>
+      <button type="button" class="senior-task" id="seniorDocuments"><span class="task-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 3.5h10l4 4v13H5zM15 3.5v4h4M8 12h8M8 16h8"/></svg></span><span><strong>Moje dokumenty</strong><small>Zobacz wszystkie dokumenty w pokazie</small></span><span aria-hidden="true">›</span></button>
+      <button type="button" class="senior-task" id="seniorMap"><span class="task-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 21s6.5-5.7 6.5-11a6.5 6.5 0 1 0-13 0c0 5.3 6.5 11 6.5 11Z"/><circle cx="12" cy="10" r="2.2"/></svg></span><span><strong>Znajdź placówkę</strong><small>Urzędy, apteki i inne miejsca</small></span><span aria-hidden="true">›</span></button>
+      <button type="button" class="senior-task" id="seniorAssistant"><span class="task-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5.5h16v11H9l-5 3zM8 9h8M8 12.5h6"/></svg></span><span><strong>Zapytaj asystenta</strong><small>Napisz lub podyktuj wiadomość</small></span><span aria-hidden="true">›</span></button>
+      <details class="more-services"><summary>Więcej usług</summary><p>Możesz też sprawdzić przykładowe przypomnienia albo otworzyć pomoc.</p><div><button type="button" id="seniorReminders">Przypomnienia</button><button type="button" id="seniorHelp">Pomoc i bezpieczeństwo</button><button type="button" id="seniorLetterModule">Tłumacz pism</button><button type="button" id="seniorFamilyModule">Centrum rodzinne</button></div></details>
+    </section>
+    <div class="reading-control" data-reading="home"><button type="button" data-read>Odczytaj instrukcję</button><button type="button" data-stop>Zatrzymaj</button><span class="speech-status" role="status"></span></div>
+  </div>
+  <div class="stackwrap" id="stackwrap"><div class="stack" id="stack"></div></div>
+  <div class="alt" id="alt"></div>
+
+  <section class="reminders" id="reminders" aria-label="Przypomnienia">
+    <div class="tiles" id="tiles"></div>
+  </section>
+  </main>
+
+  <section class="assist module-panel" id="letterPanel" lang="pl" role="dialog" aria-modal="true" aria-labelledby="letterTitle" inert>
+    <div class="assist-nav"><button type="button" class="assist-back" id="letterBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>Wstecz</button><h2 id="letterTitle">Tłumacz pism urzędowych</h2><span></span></div>
+    <div class="assist-scroll" id="letterScroll">
+      <p class="assist-kicker">PROSTYM JĘZYKIEM</p><h3 class="assist-heading">Zrozum pismo krok po kroku</h3>
+      <p class="assist-intro">Dodaj PDF z tekstem albo plik TXT. Najpierw pokażemy odczytany tekst, żebyś mógł go sprawdzić i usunąć dane osobowe.</p>
+      <div class="assist-card">
+        <label for="letterFile">Wybierz pismo (PDF lub TXT, maks. 4 MiB)</label>
+        <input id="letterFile" type="file" accept=".pdf,.txt,application/pdf,text/plain" aria-describedby="letterFileHint letterStatus">
+        <p class="field-hint" id="letterFileHint">Skanów i zdjęć nie obsługujemy. OCR nie jest dostępny.</p>
+        <label for="letterText">Treść do wyjaśnienia</label>
+        <textarea id="letterText" rows="8" maxlength="30000" autocomplete="off" spellcheck="true" aria-describedby="letterPrivacy letterStatus" placeholder="Możesz też wkleić tekst pisma"></textarea>
+        <p class="field-hint" id="letterPrivacy">Plik jest odczytywany przez serwer projektu i nie jest zapisywany przez tę funkcję. Analiza wysyła widoczny tekst do skonfigurowanego modelu AI. Przed wysłaniem usuń PESEL, adres i inne dane, których nie chcesz udostępniać. Obowiązują zasady dostawcy modelu.</p>
+        <label class="module-consent"><input id="letterConsent" type="checkbox"> Rozumiem i chcę wysłać powyższy tekst do modelu AI.</label>
+        <div class="assist-actions"><button type="button" class="assist-button secondary" id="extractLetter">Odczytaj wybrany plik</button><button type="button" class="assist-button primary" id="explainLetter">Wyjaśnij pismo</button></div>
+        <p class="assist-status" id="letterStatus" role="status" aria-live="polite"></p>
+      </div>
+      <div id="letterResults" aria-live="polite"></div>
+      <div class="assist-card module-warning"><h3>Ważne</h3><p>To pomoc informacyjna, nie porada prawna ani decyzja urzędu. Model może się mylić. Sprawdź oryginał i w razie wątpliwości skontaktuj się z urzędem. Nie będziemy dopowiadać terminu ani obowiązku, którego nie ma w cytowanym tekście.</p></div>
+    </div>
+  </section>
+
+  <section class="assist module-panel" id="familyPanel" lang="pl" role="dialog" aria-modal="true" aria-labelledby="familyTitle" inert>
+    <div class="assist-nav"><button type="button" class="assist-back" id="familyBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>Wstecz</button><h2 id="familyTitle">Bezpieczne centrum rodzinne</h2><span></span></div>
+    <div class="assist-scroll" id="familyScroll">
+      <p class="assist-kicker">LOKALNY POKAZ</p><h3 class="assist-heading">Koordynuj zadania, nie dokumenty</h3>
+      <p class="assist-intro">Zadania i lista osób są zapisywane tylko w tej przeglądarce. Nie ma tu logowania, prawdziwego udostępniania ani wysyłania przypomnień.</p>
+      <div class="assist-card family-card"><h3>Osoby i role</h3><p>Role dotyczą wyłącznie przykładowych zadań w tym urządzeniu. Nie weryfikują tożsamości ani pokrewieństwa.</p>
+        <label for="familyView">Pokaż widok osoby</label><select id="familyView" aria-describedby="familyAccessHint"></select>
+        <p class="field-hint" id="familyAccessHint">Administrator zarządza listą osób; członek dodaje zadania; czytelnik może tylko przeglądać.</p>
+        <div id="familyMembers" class="family-members" aria-live="polite"></div>
+        <form id="familyMemberForm" class="family-form"><label for="familyMemberName">Dodaj osobę (użyj imienia lub pseudonimu)</label><input id="familyMemberName" maxlength="40" required autocomplete="off"><label for="familyMemberRole">Rola</label><select id="familyMemberRole"><option value="member">Członek, może dodawać zadania</option><option value="viewer">Czytelnik, tylko podgląd</option><option value="admin">Administrator pokazu</option></select><button class="assist-button secondary wide" type="submit">Dodaj osobę</button></form>
+      </div>
+      <div class="assist-card"><h3>Terminy i zadania</h3><form id="familyTaskForm" class="family-form"><label for="familyTaskTitle">Nazwa zadania</label><input id="familyTaskTitle" maxlength="120" required autocomplete="off"><label for="familyTaskDate">Termin (opcjonalny, wpisujesz samodzielnie)</label><input id="familyTaskDate" type="date"><label class="module-consent"><input id="familyTaskShared" type="checkbox"> Udostępnij członkom tej przykładowej listy</label><button class="assist-button primary wide" type="submit">Dodaj zadanie</button></form>
+        <div class="assist-status" id="familyStatus" role="status" aria-live="polite"></div><div id="familyTasks" class="family-tasks"></div>
+      </div>
+      <div class="assist-card module-warning"><h3>Granica dostępu</h3><p>Nie ma dostępu do cudzych dokumentów, skrzynek ani kont. Zmiana roli w tym pokazie nie potwierdza uprawnień. Prawdziwa usługa wymagałaby weryfikacji tożsamości, zgody i zakresu uprawnień po stronie serwera. Dane tej demonstracji nie synchronizują się z innymi osobami ani urządzeniami.</p></div>
+    </div>
+  </section>
+
+  <section class="chat" id="chat" aria-label="Rozmowa z asystentem" inert>
+    <div class="chat-tools"><button type="button" id="chatBack" class="text-action" lang="pl" data-t="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>Wstecz</button><button type="button" id="chatHelp" class="text-action" lang="pl" data-t="0">Pomoc i bezpieczeństwo</button></div>
+    <div class="reading-control chat-reading" data-reading="chat" lang="pl" data-t="0"><button type="button" data-read>Odczytaj odpowiedź</button><button type="button" data-stop>Zatrzymaj</button><span class="speech-status" role="status"></span></div>
+    <button type="button" class="chat-notice" id="chatNotice" lang="pl" data-t="0">Asystent AI nie wykonuje spraw · Nie podawaj kodów</button>
+    <div class="msgs" id="msgs" role="log" aria-live="polite" aria-relevant="additions"></div>
+  </section>
+
+  <form class="composer" id="composer">
+    <div class="composer-heading" lang="pl" data-t="0"><label class="composer-label" for="prompt">Wpisz, czego potrzebujesz</label><button type="button" id="showSuggestions">Pokaż propozycje</button></div>
+    <div class="bar">
+      <button type="button" class="ib" id="cam" lang="pl" data-t="0" aria-label="Odczyt zdjęcia dokumentu — niedostępny"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3l1.8-2.5h6.4L17 8.5h3V19H4z"/><circle cx="12" cy="13.5" r="3.4"/></svg></button>
+      <input id="prompt" type="text" placeholder="Co chcesz załatwić?" enterkeyhint="send">
+      <button type="button" class="ib mic" id="mic" lang="pl" data-t="0" aria-label="Powiedz, czego potrzebujesz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5"/></svg></button>
+      <button type="submit" class="send" lang="pl" data-t="0" aria-label="Wyślij wiadomość lub pokaż propozycje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 18.5v-13M6.5 11 12 5.5l5.5 5.5"/></svg></button>
+    </div>
+  </form>
+
+  <div class="todo" id="todo" aria-hidden="true" inert><div class="scrim"></div>
+    <div class="tpanel" role="dialog" aria-modal="true" aria-labelledby="todoH">
+      <div class="grab"></div>
+      <div class="th"><h2 id="todoH">Do załatwienia</h2><button class="tx-close" id="todoClose" lang="pl" data-t="0" type="button"><span>Wstecz</span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
+      <div class="tl"></div>
+      <button class="task" id="todoAsk">Zapytaj asystenta o wszystkie sprawy</button>
+    </div>
+  </div>
+  <div class="sheet" id="detail" role="dialog" aria-modal="true" aria-label="Szczegóły dokumentu" inert></div>
+  <section class="assist" id="accessPanel" lang="pl" data-t="0" role="dialog" aria-modal="true" aria-labelledby="accessTitle" inert>
+    <div class="assist-nav"><button type="button" class="assist-back" id="accessBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>Wstecz</button><h2 id="accessTitle">Ułatwienia dostępu</h2><span></span></div>
+    <div class="assist-scroll" id="accessScroll">
+      <p class="assist-kicker">USTAWIENIA WYGLĄDU</p><h3 class="assist-heading">Dopasuj aplikację do siebie</h3>
+      <p class="assist-intro">Zmiany działają w całej aplikacji i są zapamiętywane na tym urządzeniu. Nie zmieniają danych ani znaczenia czynności.</p>
+      <div class="reading-control" data-reading="access"><button type="button" data-read>Odczytaj instrukcję</button><button type="button" data-stop>Zatrzymaj</button><span class="speech-status" role="status"></span></div>
+      <section class="assist-card profile-card"><div class="profile-head"><span class="feature-icon" aria-hidden="true">Aa</span><div><h3>Profil „Dla seniora”</h3><p>Większy tekst, prostsze menu i mniej ruchu na początek.</p></div></div><div class="setting-row"><label for="panelSenior">Dla seniora <small id="panelSeniorState">Wyłączone</small></label><input id="panelSenior" class="switch" type="checkbox" role="switch" aria-describedby="panelSeniorState"></div><p class="setting-hint">W każdej chwili możesz zmienić te ustawienia osobno. Wyłączenie profilu przywróci wcześniejsze ustawienia poza profilem.</p></section>
+      <section class="assist-card settings-card" aria-labelledby="personalSettingsTitle"><h3 id="personalSettingsTitle">Ustawienia indywidualne</h3><p>Dotyczą aktualnie wybranego profilu.</p>
+        <fieldset class="font-options"><legend>Wielkość tekstu</legend><label><input type="radio" name="accessFont" value="standard"> <span>Standardowa</span></label><label><input type="radio" name="accessFont" value="large"> <span>Duża</span></label><label><input type="radio" name="accessFont" value="extra"> <span>Bardzo duża</span></label></fieldset>
+        <div class="setting-row"><label for="highContrast">Wysoki kontrast <small>Wyraźniejsze kolory i granice</small></label><input id="highContrast" class="switch" type="checkbox" role="switch"></div>
+        <div class="setting-row"><label for="simpleMenu">Uproszczone menu <small>Duże skróty do najważniejszych spraw</small></label><input id="simpleMenu" class="switch" type="checkbox" role="switch"></div>
+        <div class="setting-row"><label for="reduceMotion">Ogranicz animacje <small>Bez zbędnego ruchu na ekranie</small></label><input id="reduceMotion" class="switch" type="checkbox" role="switch"></div>
+        <div class="setting-row"><label for="readingEnabled">Odczyt instrukcji <small>Pokaż przyciski do słuchania na ekranach</small></label><input id="readingEnabled" class="switch" type="checkbox" role="switch"></div>
+      </section>
+      <p class="preference-status" id="preferenceStatus" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+  <section class="assist" id="mapPanel" lang="pl" data-t="0" role="dialog" aria-modal="true" aria-labelledby="mapTitle" inert>
+    <div class="assist-nav"><button type="button" class="assist-back" id="mapBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>Wstecz</button><h2 id="mapTitle">Mapa placówek</h2><span></span></div>
+    <div class="assist-scroll" id="mapScroll">
+      <p class="assist-kicker">URZĘDY I USŁUGI W POBLIŻU</p><h3 class="assist-heading">Znajdź właściwe miejsce</h3>
+      <p class="assist-intro">Wpisz miejscowość lub użyj swojej lokalizacji. Potem wybierz sprawę albo rodzaj placówki.</p>
+      <div class="reading-control" data-reading="map"><button type="button" data-read>Odczytaj instrukcję</button><button type="button" data-stop>Zatrzymaj</button><span class="speech-status" role="status"></span></div>
+      <section class="assist-card map-search-card" aria-labelledby="locationHeading"><p class="step-label">KROK 1 Z 2</p><h3 id="locationHeading">Gdzie szukamy?</h3><label for="placeLocation">Miejscowość lub adres</label><input id="placeLocation" type="search" autocomplete="address-level2" placeholder="Np. Warszawa" maxlength="200"><button type="button" class="assist-button primary wide" id="searchLocation">Pokaż miejsca</button><button type="button" class="assist-button secondary wide" id="useLocation">Użyj mojej lokalizacji</button><p class="map-privacy">Po wyszukaniu miejscowość lub współrzędne są przesyłane do usług OpenStreetMap (Nominatim i Overpass). Lokalizacja urządzenia wymaga Twojej zgody.</p><p class="map-status" id="mapStatus" role="status" aria-live="polite"></p></section>
+      <section id="mapResults" hidden aria-labelledby="resultsHeading"><div class="map-step"><p class="step-label">KROK 2 Z 2</p><h3 id="resultsHeading">Wybierz sprawę lub placówkę</h3><p id="searchedLocation"></p><button type="button" class="text-action change-location" id="changeLocation">Wstecz do lokalizacji</button></div>
+        <div class="assist-card map-filters"><label for="placeTask">Jaka sprawa?</label><select id="placeTask"><option value="">Wszystkie sprawy</option><option value="municipal">Dowód osobisty lub sprawy gminy</option><option value="county">Rejestracja pojazdu lub sprawy powiatu</option><option value="tax">Podatki — urząd skarbowy</option><option value="zus">Świadczenia i składki — ZUS</option><option value="passport">Paszport</option><option value="resident">Obsługa mieszkańców</option><option value="pharmacy">Leki — apteka</option><option value="primary">Lekarz rodzinny — POZ</option><option value="hospital">Szpital</option><option value="police">Policja</option><option value="arimr">Sprawy rolnicze — ARiMR</option><option value="roads">Drogi wojewódzkie</option><option value="atm">Wypłata gotówki — bankomat</option></select><p class="filter-hint" id="taskHint">Wybór sprawy podpowie rodzaj placówki. Sprawdź zakres obsługi przed wizytą.</p><label for="placeType">Rodzaj placówki</label><select id="placeType"><option value="">Wszystkie rodzaje</option><option value="municipal">Urząd miasta lub gminy</option><option value="county">Starostwo powiatowe</option><option value="tax">Urząd skarbowy</option><option value="zus">ZUS</option><option value="passport">Punkt paszportowy</option><option value="resident">Obsługa mieszkańców</option><option value="pharmacy">Apteka</option><option value="primary">Przychodnia lub POZ</option><option value="hospital">Szpital</option><option value="police">Policja</option><option value="arimr">ARiMR</option><option value="roads">Drogi wojewódzkie</option><option value="atm">Bankomat</option></select><label for="placeFilter">Szukaj po nazwie lub sprawie</label><input id="placeFilter" type="search" placeholder="Np. apteka, podatki" autocomplete="off"></div>
+        <div class="map-frame"><div id="placeMap" class="place-map" tabindex="0" role="application" aria-label="Interaktywna mapa. Użyj przycisków powiększenia lub klawiszy strzałek, aby ją przesunąć."><div id="mapTiles" class="map-layer" aria-hidden="true"></div><div id="mapMarkers" class="map-layer"></div></div><div class="map-controls"><button type="button" id="mapZoomIn" aria-label="Powiększ mapę">+</button><button type="button" id="mapZoomOut" aria-label="Pomniejsz mapę">−</button></div><div class="map-attribution">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap i współtwórcy</a></div></div>
+        <p class="map-tile-status" id="mapTileStatus" role="status"></p><p class="map-data-note">Dane OpenStreetMap są tworzone społecznościowo i mogą być niepełne lub nieaktualne. Potwierdź informacje przed wizytą.</p>
+        <div class="result-heading"><h3>Wyniki w pobliżu</h3><span id="placeCount" role="status"></span></div><div id="placeList" class="place-list"></div>
+      </section>
+    </div>
+  </section>
+  <section class="assist safety-panel" id="safetyPanel" lang="pl" data-t="0" role="dialog" aria-modal="true" aria-labelledby="safetyModuleTitle" inert>
+    <div class="assist-nav safety-nav"><button type="button" class="assist-back" id="safetyModuleBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg><span id="safetyBackText">Wstecz</span></button><h2 id="safetyModuleTitle">Bezpieczny Obywatel</h2><button type="button" class="safety-mode-toggle" id="safetyMode" aria-pressed="false">Tryb awaryjny</button></div>
+    <div class="safety-access-tools" id="safetyAccessTools" hidden><button type="button" id="safetyLarge" aria-pressed="true">Duży tekst</button><button type="button" id="safetyContrast" aria-pressed="true">Wysoki kontrast</button><button type="button" id="safetyExitMode">Wyłącz tryb awaryjny</button></div>
+    <div class="assist-scroll" id="safetyScroll"><div id="safetyContent"><p role="status">Ładowanie poradników…</p></div></div>
+  </section>
+  <section class="assist" id="helpPanel" lang="pl" data-t="0" role="dialog" aria-modal="true" aria-labelledby="helpTitle" inert>
+    <div class="assist-nav">
+      <button type="button" class="assist-back" id="helpBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>Wstecz</button>
+      <h2 id="helpTitle">Pomoc i dostępność</h2><span></span>
+    </div>
+    <div class="assist-scroll" id="helpScroll">
+      <div id="helpMain">
+        <p class="assist-kicker">POMOC W PROTOTYPIE</p>
+        <h3 class="assist-heading">Jesteśmy tu, żeby pomóc</h3>
+        <p class="assist-intro">Wybierz sposób, który jest dla Ciebie wygodny. Dokumenty w tym pokazie są przykładowe. Asystent wymaga połączenia z modelem i nie wykonuje spraw urzędowych.</p>
+        <section class="assist-card" aria-labelledby="voiceHeading">
+          <div class="assist-card-heading"><span class="assist-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v2.5"/></svg></span><div><h3 id="voiceHeading">Powiedz lub napisz</h3><p>Wybór należy do Ciebie</p></div></div>
+          <p>Możesz wpisać wiadomość lub ją podyktować. Nagranie może zostać przesłane do usługi rozpoznawania mowy. Wysłana wiadomość trafia do dostawcy modelu. Nie podawaj haseł ani kodów.</p>
+          <label for="voiceDraft">Twoja wiadomość</label>
+          <textarea id="voiceDraft" rows="3" aria-describedby="voiceHint" placeholder="Wpisz, czego potrzebujesz"></textarea>
+          <p class="field-hint" id="voiceHint">Sprawdź i popraw rozpoznany tekst. Nic nie zostanie wysłane automatycznie.</p>
+          <div class="assist-actions"><button class="assist-button secondary" id="dictate" type="button">Powiedz, czego potrzebujesz</button><button class="assist-button secondary" id="cancelDictation" type="button" hidden>Anuluj nagrywanie</button><button class="assist-button secondary" id="useDraft" type="button">Przenieś do wiadomości</button><button class="assist-button primary" id="sendDraft" type="button">Wyślij do asystenta</button></div>
+          <p class="assist-status" id="dictationStatus" role="status" aria-live="polite"></p>
+        </section>
+        <section class="assist-card" aria-labelledby="listenHeading">
+          <div class="assist-card-heading"><span class="assist-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4h4l5 4V6l-5 4H4zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg></span><div><h3 id="listenHeading">Odsłuchaj</h3><p>Instrukcja lub ostatnia odpowiedź</p></div></div>
+          <div class="assist-actions"><button class="assist-button secondary" id="readInstructions" type="button">Przeczytaj instrukcję</button><button class="assist-button secondary" id="readAnswer" type="button">Przeczytaj ostatnią odpowiedź</button><button class="assist-button subtle" id="stopReading" type="button" disabled>Zatrzymaj odczyt</button><button class="assist-button subtle" id="replayReading" type="button" disabled>Odsłuchaj ponownie</button></div>
+          <p class="assist-status" id="readingStatus" role="status" aria-live="polite"></p>
+        </section>
+        <section class="assist-card" id="lmStudioCard" aria-labelledby="lmStudioHeading" hidden>
+          <div class="assist-card-heading"><span class="assist-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="4.5" width="17" height="12" rx="2"/><path d="M8 20h8M12 16.5V20M8 10.5h.1M12 10.5h4"/></svg></span><div><h3 id="lmStudioHeading">Model LM Studio</h3><p>Połączenie z wybranym serwerem</p></div></div>
+          <p>Wiadomości trafiają do skonfigurowanego serwera LM Studio. Model nie wykonuje spraw urzędowych. Nie wpisuj haseł ani kodów.</p>
+          <button class="assist-button secondary wide" id="lmStudioRefresh" type="button">Sprawdź połączenie i pokaż modele</button>
+          <label for="lmStudioModel">Wybrany model</label><select id="lmStudioModel" aria-describedby="lmStudioHint lmStudioStatus" disabled><option value="">Najpierw pokaż modele</option></select>
+          <p class="field-hint" id="lmStudioHint">Wybierz model do rozmowy. Lista nie pobiera modeli: wczytaj go w LM Studio albo włącz Just-in-Time.</p>
+          <p class="assist-status" id="lmStudioStatus" role="status" aria-live="polite"></p>
+        </section>
+        <section class="assist-card" aria-labelledby="searchHeading">
+          <div class="assist-card-heading"><span class="assist-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4 4"/></svg></span><div><h3 id="searchHeading">Znajdź sprawę</h3><p>Wyszukaj lub wybierz temat</p></div></div>
+          <label for="caseSearch">Wyszukaj sprawę</label><input id="caseSearch" type="search" placeholder="Np. dowód osobisty" autocomplete="off">
+          <p class="assist-status" id="searchStatus" role="status" aria-live="polite"></p><div id="searchResults" class="search-results"></div>
+        </section>
+        <section class="assist-card assist-links" aria-labelledby="moreHelpHeading">
+          <h3 id="moreHelpHeading">Więcej pomocy</h3>
+          <button class="assist-link" id="helpAccess" type="button"><span><b>Ułatwienia dostępu</b><small>Wielkość tekstu, kontrast i profil seniora</small></span><span aria-hidden="true">›</span></button>
+          <button class="assist-link" id="trustedHelp" type="button"><span><b>Potrzebuję pomocy bliskiej osoby</b><small>Jak bezpiecznie poprosić o wsparcie</small></span><span aria-hidden="true">›</span></button>
+          <button class="assist-link" id="safetyHelp" type="button"><span><b>Czy to bezpieczne?</b><small>Chroń hasła, kody i dane logowania</small></span><span aria-hidden="true">›</span></button>
+        </section>
+        <section class="assist-card" aria-labelledby="glossaryHeading"><h3 id="glossaryHeading" tabindex="-1">Słowniczek urzędowy</h3>
+          <div class="glossary-term"><b>Wniosek</b><details><summary>Co to znaczy?</summary><p>Pismo lub formularz, w którym prosisz urząd o załatwienie konkretnej sprawy.</p></details></div>
+          <div class="glossary-term"><b>Pełnomocnictwo</b><details><summary>Co to znaczy?</summary><p>Upoważnienie innej osoby do działania w Twoim imieniu w określonym zakresie. W niektórych sprawach potrzebna jest określona forma.</p></details></div>
+          <div class="glossary-term"><b>Termin ważności</b><details><summary>Co to znaczy?</summary><p>Data, do której dokument jest ważny, o ile nie zostanie wcześniej unieważniony.</p></details></div>
+        </section>
+      </div>
+      <section id="trustedScreen" class="assist-subscreen" hidden aria-labelledby="trustedTitle">
+        <p class="assist-kicker">BEZPIECZNE WSPARCIE</p><h3 class="assist-heading" id="trustedTitle" tabindex="-1">Pomoc bliskiej osoby</h3>
+        <p class="assist-intro">Możesz poprosić kogoś zaufanego, żeby usiadł obok Ciebie, przeczytał instrukcję lub pomógł znaleźć właściwy ekran.</p>
+        <div class="assist-card"><h4>Ty decydujesz</h4><p>Samodzielnie sprawdzaj i potwierdzaj każdą czynność. Nie podawaj nikomu haseł, danych logowania ani kodów SMS i autoryzacyjnych.</p><p>Ten scenariusz nie udostępnia bliskiej osobie żadnych danych. W pełnej aplikacji dostęp do konkretnej sprawy wymagałby Twojej wyraźnej zgody i określenia zakresu.</p></div>
+        <div class="assist-card"><h4>Pełnomocnictwo</h4><details><summary>Co to znaczy?</summary><p>Upoważnienie innej osoby do działania w Twoim imieniu w określonym zakresie. W niektórych sprawach potrzebna jest określona forma.</p></details><p>Jeśli bliska osoba ma załatwić sprawę w Twoim imieniu, sprawdź w urzędzie, czy i jakie pełnomocnictwo jest potrzebne.</p></div>
+        <button class="assist-button primary wide" id="trustedBack" type="button">Wstecz do pomocy</button>
+      </section>
+      <section id="safetyScreen" class="assist-subscreen" hidden aria-labelledby="safetyTitle">
+        <p class="assist-kicker">BEZPIECZEŃSTWO</p><h3 class="assist-heading" id="safetyTitle" tabindex="-1">Czy to bezpieczne?</h3>
+        <div class="assist-card"><h4>Chroń swoje dane</h4><p>Nie udostępniaj haseł, danych logowania ani kodów SMS lub autoryzacyjnych osobom podającym się za urzędników, asystenta lub bliskich.</p><p>Nie klikaj podejrzanych linków. Adres urzędu wpisz samodzielnie albo skorzystaj z zaufanej zakładki. W razie wątpliwości skontaktuj się z urzędem przez znany Ci oficjalny kanał.</p></div>
+        <div class="assist-card"><h4>Jak traktować odpowiedzi?</h4><p><b>Informacja:</b> w tym pokazie dane są fikcyjne, a odpowiedź może zawierać błąd.</p><p><b>Rekomendacja:</b> sugestia asystenta nie jest decyzją urzędu.</p><p><b>Oficjalne potwierdzenie:</b> aktualne warunki i skutki sprawdź we właściwym urzędzie lub na gov.pl. Asystent nie jest urzędem i nie gwarantuje poprawności prawnej.</p></div>
+        <button class="assist-button primary wide" id="safetyBack" type="button">Wstecz do pomocy</button>
+      </section>
+      <section id="reminderScreen" class="assist-subscreen" hidden aria-labelledby="reminderTitle">
+        <p class="assist-kicker">PRZYKŁADOWE PRZYPOMNIENIE</p><h3 class="assist-heading" id="reminderTitle" tabindex="-1">Dowód osobisty</h3><p class="assist-intro">Sprawdź termin ważności dokumentu.</p>
+        <div class="assist-card"><p class="reminder-date-label">Przykładowy termin ważności</p><p class="reminder-date" id="exampleDate"></p><details><summary>Co to znaczy?</summary><p>Termin ważności to data, do której dokument jest ważny, o ile nie zostanie wcześniej unieważniony.</p></details><p>To fikcyjne dane pokazowe. Prototyp nie sprawdza rejestrów ani nie wysyła powiadomień.</p></div>
+        <button class="assist-button primary wide" id="openExampleDocument" type="button">Otwórz przykładowy dokument</button>
+      </section>
+    </div>
+  </section>
+  <div class="auth" id="faceid" aria-hidden="true"><div class="box">
+    <svg class="face" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 15V10a4 4 0 0 1 4-4h5M33 6h5a4 4 0 0 1 4 4v5M42 33v5a4 4 0 0 1-4 4h-5M15 42h-5a4 4 0 0 1-4-4v-5M17 18v3M31 18v3M24 18v8h-2M18 32s2.4 2.6 6 2.6 6-2.6 6-2.6"/></svg>
+    <svg class="ok" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="18"/><path d="m16 24.5 5.5 5.5L32 19"/></svg>
+    <span>Face ID — symulacja</span>
+  </div></div>
+  <div class="homebar" aria-hidden="true"></div>
+</div>
+<script src="osoby.js?v=21"></script>
+<script src="sylwetki.js?v=19"></script>
+<script src="core.js?v=22"></script>
+<script src="variants.js?v=21"></script>
+<script src="scenarios.js?v=23"></script>
+<script src="agent.js?v=28"></script>
+<script src="znak-kod.js?v=19"></script>
+<script src="znak.js?v=23"></script>
+<script src="accessibility.js?v=2"></script>
+<script src="preferences.js?v=1"></script>
+<script src="places.js?v=1"></script>
+<script src="lmstudio.js?v=1"></script>
+<script src="modules.js?v=1"></script>
+<script src="safety.js?v=1"></script>
+</body>
+</html>

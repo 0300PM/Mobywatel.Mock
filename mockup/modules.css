@@ -1,0 +1,48 @@
+.module-panel .assist-scroll{padding-bottom:max(env(safe-area-inset-bottom),32px)}
+.module-panel .module-warning{border-left:4px solid #8a4b08}
+.module-consent{display:flex!important;align-items:flex-start;gap:10px;min-height:44px;margin:12px 0!important;font-weight:500!important;line-height:1.45}
+.module-consent input{width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;margin:0;accent-color:#b30f30;flex:none}
+#letterFile{padding:8px!important;min-height:48px}
+.letter-result{margin:12px 0}
+.letter-result h3{margin:0 0 8px}
+.letter-result h4{margin:16px 0 6px}
+.letter-result ul{padding-left:22px;margin:8px 0}
+.letter-result li{padding:8px 0;border-top:1px solid var(--hair)}
+.letter-meaning{font-size:16px;line-height:1.55}
+.letter-quote{margin:6px 0;padding:8px 12px;border-left:3px solid #58677b;background:#f2f3f7;color:#252a34;overflow-wrap:anywhere;font-size:14px;line-height:1.5}
+.letter-kind{display:inline-block;padding:3px 8px;border-radius:8px;font-size:12px;font-weight:700}
+.letter-kind.fact{background:#e8f3eb;color:#174d26}
+.letter-kind.interpretation{background:#fff0d7;color:#653b00}
+.letter-section-title{margin-top:16px!important}
+.family-members ul{list-style:none;padding:0;margin:8px 0}
+.family-members li{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;padding:6px 0;border-top:1px solid var(--hair)}
+.family-members li select{width:auto;flex:1}
+.family-member-name{font-weight:600;overflow-wrap:anywhere}
+.family-role{color:#343843;font-size:14px;text-align:right}
+.family-form{margin-top:12px;padding-top:10px;border-top:1px solid var(--hair)}
+.family-form button{margin-top:12px}
+.family-tasks{margin-top:12px}
+.family-task{padding:12px 0;border-top:1px solid var(--hair);overflow-wrap:anywhere}
+.family-task h4{margin:0 0 6px!important}
+.family-task p{margin:4px 0!important}
+.family-task .assist-button{margin-top:8px}
+.family-task-scope,.family-task-date,.family-empty{color:#343843}
+.family-task .assist-button{min-height:44px}
+.module-panel button,.module-panel input,.module-panel select,.module-panel textarea{scroll-margin:12px}
+.share-assistant{margin:16px 0;padding:14px;border:1px solid #d5d9e2;border-radius:18px;background:#fff;color:#20232b;box-shadow:0 1px 2px rgba(15,25,60,.06)}
+.share-assistant h3{margin:0 0 10px;font-size:20px;line-height:1.3}
+.share-assistant h4{margin:14px 0 4px;font-size:15px;line-height:1.35}
+.share-assistant p{margin:5px 0;color:#343843;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.share-assistant .share-badge{display:inline-block;margin:0 0 8px;padding:4px 8px;border-radius:8px;background:#fdecef;color:#8f102d;font-size:12px;font-weight:700;letter-spacing:.03em}
+.share-fields{margin:8px 0;border-top:1px solid #d8dce4}
+.share-field{display:flex!important;align-items:center;gap:10px;min-height:52px;margin:0!important;padding:7px 2px;border-bottom:1px solid #d8dce4;font-weight:400!important}
+.share-field input{flex:none;width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;margin:0;accent-color:#b30f30}
+.share-field span{display:block;min-width:0}
+.share-field b,.share-field small{display:block;overflow-wrap:anywhere}
+.share-field b{font-size:14px}
+.share-field small{margin-top:2px;color:#343843;font-size:13px;line-height:1.35}
+.share-selection{font-weight:700}
+.share-assistant .share-disclaimer{margin-top:12px;padding-top:10px;border-top:1px solid #d8dce4;font-size:13px}
+.qrx .qbtn.primary:disabled{opacity:1;background:#5e6470;color:#fff;cursor:not-allowed}
+@media (max-width:360px){.module-panel .assist-nav{grid-template-columns:minmax(68px,auto) minmax(0,1fr) 8px}.module-panel .assist-nav h2{font-size:15px}.family-members li{align-items:flex-start;flex-direction:column}.family-members li select{text-align:left;width:100%}}
+@media (prefers-reduced-motion:reduce){.module-panel{transition:none}}

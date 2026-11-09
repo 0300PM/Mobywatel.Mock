@@ -126,7 +126,8 @@ def claude(messages, key, log):
                 time.sleep(1.0 * (proba + 1))
     raise BladAPI(last or 'brak odpowiedzi')
 
-PROVIDER = os.environ.get('PROVIDER', 'openai')
+# Na Vercelu nie ma LM Studio ani klucza OpenAI: bez jawnego PROVIDER, ale z adresem workera, idziemy przez workers.
+PROVIDER = os.environ.get('PROVIDER') or ('workers' if os.environ.get('CLOUDFLARE_WORKERS_URL') else 'openai')
 OPENAI_MODEL = os.environ.get('OPENAI_MODEL', 'gpt-4o-mini')
 OPENAI_TIER = os.environ.get('OPENAI_TIER', '')
 OPENAI_EFFORT = os.environ.get('OPENAI_EFFORT', '')

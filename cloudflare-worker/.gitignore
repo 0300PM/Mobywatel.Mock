@@ -1,0 +1,10 @@
+node_modules/
+
+# lokalny stan wrangler (dev sessions, cache); nie zawiera sekretow, ale nie nalezy do repo
+.wrangler/
+
+# lokalne zmienne i sekrety workera (nigdy nie commituj)
+.dev.vars
+.dev.vars.*
+.env
+.env.*

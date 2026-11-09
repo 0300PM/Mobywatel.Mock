@@ -1,0 +1,15 @@
+{
+  "name": "mobywatels-workers-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Worker Cloudflare: API zgodne z OpenAI na Workers AI dla prototypu Mobywatels",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.159.0"
+  },
+  "type": "module"
+}

@@ -1,0 +1,14 @@
+services:
+  mobywatel:
+    build: .
+    env_file: .env
+    environment:
+      # Dostawce wybiera PROVIDER z .env (lmstudio albo workers). CLOUDFLARE_WORKERS_* sa w .env, wiec tu ich nie powtarzamy.
+      PROVIDER: "${PROVIDER:-lmstudio}"
+      LM_STUDIO_BASE_URL: "${LM_STUDIO_BASE_URL:-http://host.docker.internal:8791/v1}"
+      LM_STUDIO_MODEL: "${LM_STUDIO_MODEL:-google/gemma-4-12b}"
+    ports:
+      - "127.0.0.1:8790:8790"   # tylko lokalnie: serwer korzysta z Twoich kluczy API i nie ma logowania
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # dostęp do serwera modelu na Twoim komputerze (Linux)
+    restart: unless-stopped

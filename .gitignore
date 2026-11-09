@@ -1,0 +1,10 @@
+node_modules/
+test-results/
+playwright-report/
+serwer/agent.log
+__pycache__/
+serwer/i18n/_zrodla.json
+
+.env
+.env.*
+!.env.example

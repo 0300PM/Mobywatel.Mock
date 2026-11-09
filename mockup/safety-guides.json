@@ -1,0 +1,292 @@
+{
+  "reviewedAt": "2026-11-08",
+  "sources": {
+    "handbook": {"name": {"pl": "Rządowy Poradnik bezpieczeństwa", "en": "Government Safety Handbook"}, "url": "https://www.gov.pl/web/poradnikbezpieczenstwa"},
+    "rcbFlood": {"name": {"pl": "RCB — Powódź", "en": "Government Security Centre — Floods"}, "url": "https://www.gov.pl/web/poradnikbezpieczenstwa/powodz"},
+    "rcbFire": {"name": {"pl": "RCB — Pożar", "en": "Government Security Centre — Fire"}, "url": "https://www.gov.pl/web/poradnikbezpieczenstwa/pozar"},
+    "rcbPower": {"name": {"pl": "RCB — Długotrwały brak prądu", "en": "Government Security Centre — Prolonged power outage"}, "url": "https://www.gov.pl/web/poradnikbezpieczenstwa/dlugotrwaly-brak-pradu-blackout"},
+    "rcbEvacuation": {"name": {"pl": "RCB — Ewakuacja", "en": "Government Security Centre — Evacuation"}, "url": "https://www.gov.pl/web/poradnikbezpieczenstwa/ewakuacja"},
+    "rcbHazards": {"name": {"pl": "RCB — Baza zagrożeń", "en": "Government Security Centre — Hazard guidance"}, "url": "https://www.gov.pl/web/rcb/baza-zagrozen6"},
+    "gas": {"name": {"pl": "PSP — Gaz w domu", "en": "State Fire Service — Gas at home"}, "url": "https://www.gov.pl/web/kwpsp-opole/prewencja-spoleczna-porady-gaz-w-domu"},
+    "weather": {"name": {"pl": "RCB — Bezpieczne wakacje: burze i upał", "en": "Government Security Centre — Storms and heat"}, "url": "https://www.gov.pl/web/rcb/bezpieczne-wakacje"},
+    "weatherAlerts": {"name": {"pl": "IMGW — ostrzeżenia meteorologiczne", "en": "IMGW — weather warnings"}, "url": "https://meteo.imgw.pl/"},
+    "emergency112": {"name": {"pl": "MSWiA — Numer alarmowy 112", "en": "Ministry of Interior — Emergency number 112"}, "url": "https://www.gov.pl/web/numer-alarmowy-112"},
+    "chemical": {"name": {"pl": "RCB — Zagrożenia chemiczne", "en": "Government Security Centre — Chemical hazards"}, "url": "https://www.gov.pl/web/rcb/zagrozenia-chemiczne"},
+    "suspicious": {"name": {"pl": "RCB — Niepokojące zachowania", "en": "Government Security Centre — Suspicious behaviour"}, "url": "https://www.gov.pl/web/poradnikbezpieczenstwa/niepokojace-zachowania"}
+  },
+  "scenarios": [
+    {
+      "id": "powodz", "icon": "!", "title": {"pl": "Powódź i podtopienie", "en": "Flooding"},
+      "summary": {"pl": "Najpierw śledź komunikaty służb i nie czekaj z ewakuacją, gdy zostanie ogłoszona.", "en": "Follow official instructions and do not delay an announced evacuation."},
+      "steps": [
+        {"pl": "Sprawdzaj aktualne komunikaty RCB, IMGW i lokalnych władz; ten ekran sam nie pobiera alertów.", "en": "Check current Government Security Centre, IMGW and local authority updates; this screen does not fetch alerts."},
+        {"pl": "Przygotuj plecak, leki i rzeczy potrzebne domownikom oraz zwierzętom. Przenieś ważne przedmioty wyżej tylko wtedy, gdy jest to bezpieczne.", "en": "Prepare a go-bag, essential medicines and items for household members and pets. Move important items upstairs only if it is safe."},
+        {"pl": "Gdy służby zarządzą ewakuację, wyjdź bez zwłoki wyznaczoną trasą. Pomóż dzieciom, seniorom i osobom wymagającym wsparcia.", "en": "If authorities order evacuation, leave promptly using the instructed route. Support children, older adults and anyone needing assistance."},
+        {"pl": "Nie wchodź do zalanych piwnic ani na zalane drogi. Jeśli utkniesz lub ktoś jest zagrożony, zadzwoń pod 112.", "en": "Do not enter flooded basements or roads. If trapped or someone is in danger, call 112."}
+      ],
+      "checklist": [
+        {"pl": "Włączone powiadomienia i sprawdzone oficjalne komunikaty", "en": "Official alerts enabled and checked"},
+        {"pl": "Plecak, dokumenty i niezbędne rzeczy domowników przygotowane", "en": "Go-bag, documents and household essentials ready"},
+        {"pl": "Ustalona bezpieczna trasa i kontakt z bliskimi", "en": "Safe route and family contact plan agreed"},
+        {"pl": "Dzieci, osoby potrzebujące wsparcia i zwierzęta uwzględnione", "en": "Children, people needing assistance and pets considered"}
+      ],
+      "avoid": [
+        {"pl": "Nie przechodź ani nie przejeżdżaj przez wodę powodziową; nie wchodź do zalanych pomieszczeń.", "en": "Do not walk or drive through floodwater or enter flooded rooms."},
+        {"pl": "Nie ignoruj polecenia ewakuacji i nie wracaj po rzeczy, jeśli droga jest zagrożona.", "en": "Do not ignore evacuation orders or return for belongings when the route is unsafe."}
+      ],
+      "mistakes": [
+        {"pl": "Zwlekanie z wyjściem do chwili, gdy drogi są już zalane.", "en": "Waiting until roads are already flooded before leaving."},
+        {"pl": "Próba przejazdu przez wodę o nieznanej głębokości.", "en": "Trying to drive through water of unknown depth."},
+        {"pl": "Pozostawienie leków, pomocy mobilnościowej lub zwierząt bez planu.", "en": "Leaving medicines, mobility aids or pets without a plan."}
+      ],
+      "sources": ["rcbFlood", "rcbEvacuation", "weatherAlerts"]
+    },
+    {
+      "id": "pozar", "icon": "!", "title": {"pl": "Pożar lub dym", "en": "Fire or smoke"},
+      "summary": {"pl": "Uruchom alarm, opuść zagrożone miejsce i wezwij pomoc z bezpiecznego miejsca.", "en": "Raise the alarm, leave the danger area and call for help from a safe place."},
+      "steps": [
+        {"pl": "Jeśli widzisz ogień lub dym, ostrzeż osoby w pobliżu i zadzwoń pod 112. Podaj adres i informację, czy ktoś może być w środku.", "en": "If you see fire or smoke, warn nearby people and call 112. Give the address and say whether anyone may be inside."},
+        {"pl": "Opuść budynek najbliższą bezpieczną drogą ewakuacyjną. Korzystaj ze schodów, nigdy z windy.", "en": "Leave by the nearest safe exit route. Use stairs, never the lift."},
+        {"pl": "Jeśli droga jest zadymiona lub zablokowana, nie wchodź w ogień ani gęsty dym; zamknij się w bezpiecznym pomieszczeniu, jeśli możesz, i zadzwoń 112.", "en": "If the route is smoky or blocked, do not enter flames or dense smoke; shelter in a safer room if possible and call 112."},
+        {"pl": "Po wyjściu oddal się od budynku i przekaż ratownikom, gdzie może znajdować się osoba potrzebująca pomocy.", "en": "Once outside, move away from the building and tell responders where anyone needing help may be."}
+      ],
+      "checklist": [
+        {"pl": "Każdy domownik zna wyjście i miejsce zbiórki", "en": "Everyone knows an exit and meeting point"},
+        {"pl": "Drogi ewakuacyjne są drożne", "en": "Escape routes are clear"},
+        {"pl": "Czujki dymu są sprawne", "en": "Smoke alarms work"},
+        {"pl": "W razie zdarzenia ktoś dzwoni pod 112 z bezpiecznego miejsca", "en": "Someone calls 112 from a safe place"}
+      ],
+      "avoid": [
+        {"pl": "Nie używaj windy i nie wracaj do płonącego budynku.", "en": "Do not use a lift or re-enter a burning building."},
+        {"pl": "Nie otwieraj okien ani drzwi prowadzących do ognia; nie próbuj gasić pożaru, jeśli nie jest to bezpieczne.", "en": "Do not open windows or doors toward the fire; do not attempt to fight a fire if it is unsafe."}
+      ],
+      "mistakes": [
+        {"pl": "Zbieranie rzeczy kosztem opóźnienia ewakuacji.", "en": "Collecting belongings at the cost of delaying evacuation."},
+        {"pl": "Korzystanie z windy lub powrót po wyjściu.", "en": "Using a lift or going back inside."},
+        {"pl": "Brak informacji dla 112 o osobach pozostałych w budynku.", "en": "Not telling 112 that someone may remain inside."}
+      ],
+      "sources": ["rcbFire", "emergency112", "rcbEvacuation"]
+    },
+    {
+      "id": "prad", "icon": "!", "title": {"pl": "Awaria prądu", "en": "Power outage"},
+      "summary": {"pl": "Oszczędzaj baterię, bezpiecznie korzystaj ze światła i śledź komunikaty operatora.", "en": "Conserve battery, use lighting safely and follow your utility's updates."},
+      "steps": [
+        {"pl": "Użyj latarki lub lampy na baterie; włącz oszczędzanie energii w telefonie i ogranicz niepotrzebne połączenia.", "en": "Use a flashlight or battery lamp; enable low-power mode on your phone and limit non-essential calls."},
+        {"pl": "Ogranicz otwieranie lodówki i zamrażarki. Odłącz wrażliwe urządzenia, jeśli jest to bezpieczne.", "en": "Keep the refrigerator and freezer closed. Unplug sensitive appliances if it is safe to do so."},
+        {"pl": "Sprawdź oficjalne komunikaty operatora energii i lokalnych władz, korzystając z radia na baterie, jeśli sieć nie działa.", "en": "Check your power utility's and local authorities' official updates; use a battery radio if networks are unavailable."},
+        {"pl": "Zgłoś zerwaną linię operatorowi lub służbom, nie zbliżaj się do przewodów. W razie zagrożenia życia zadzwoń 112.", "en": "Report a fallen line to the utility or emergency services and keep away. Call 112 if life is at risk."}
+      ],
+      "checklist": [
+        {"pl": "Latarka i zapas baterii", "en": "Flashlight and spare batteries"},
+        {"pl": "Naładowany powerbank i przewody", "en": "Charged power bank and cables"},
+        {"pl": "Radio na baterie lub korbkę", "en": "Battery- or crank-powered radio"},
+        {"pl": "Woda, żywność i plan kontaktu z domownikami", "en": "Water, food and a household contact plan"}
+      ],
+      "avoid": [
+        {"pl": "Nie dotykaj przewodów ani urządzeń uszkodzonych przez wodę.", "en": "Do not touch power lines or equipment damaged by water."},
+        {"pl": "Nie używaj urządzeń spalinowych wewnątrz budynku ani w zamkniętym pomieszczeniu.", "en": "Do not operate fuel-burning equipment indoors or in an enclosed space."}
+      ],
+      "mistakes": [
+        {"pl": "Częste otwieranie lodówki i szybkie rozładowanie telefonu.", "en": "Frequently opening the refrigerator and quickly draining the phone battery."},
+        {"pl": "Zbliżanie się do zerwanej linii lub zalanej instalacji.", "en": "Approaching a fallen line or flooded electrical equipment."},
+        {"pl": "Zakładanie, że brak internetu oznacza brak oficjalnych komunikatów — sprawdź radio lub sąsiadów.", "en": "Assuming no internet means no official updates; check radio or neighbours."}
+      ],
+      "sources": ["rcbPower", "handbook"]
+    },
+    {
+      "id": "pogoda", "icon": "!", "title": {"pl": "Ekstremalna pogoda", "en": "Extreme weather"},
+      "summary": {"pl": "Rodzaj zagrożenia może się szybko zmieniać — sprawdź aktualne ostrzeżenia IMGW i RCB.", "en": "Conditions can change quickly—check current IMGW and Government Security Centre warnings."},
+      "steps": [
+        {"pl": "Wybierz, co występuje: burza lub wiatr, upał, śnieg lub mróz. Status na tym ekranie nie jest prognozą.", "en": "Choose what is happening: storm or wind, heat, snow or freezing conditions. This screen is not a forecast."},
+        {"pl": "Sprawdź ostrzeżenia IMGW i komunikaty RCB. Stosuj się do lokalnych poleceń.", "en": "Check IMGW warnings and Government Security Centre alerts. Follow local instructions."},
+        {"pl": "Burza lub wiatr: szukaj bezpiecznego schronienia, unikaj drzew, otwartej przestrzeni i przewodów; zabezpiecz luźne przedmioty tylko przed nadejściem zagrożenia.", "en": "Storm or wind: seek safe shelter, avoid trees, open areas and power lines; secure loose objects only before conditions become dangerous."},
+        {"pl": "Upał: ogranicz wysiłek i słońce, pij wodę, sprawdzaj samopoczucie dzieci, seniorów i zwierząt. Śnieg lub mróz: ogranicz zbędne podróże i ubierz się warstwowo.", "en": "Heat: limit exertion and sun exposure, drink water, check on children, older adults and pets. Snow or cold: avoid unnecessary travel and dress in layers."},
+        {"pl": "Przy objawach zagrożenia zdrowia, uszkodzeniu infrastruktury lub bezpośrednim zagrożeniu zadzwoń 112.", "en": "Call 112 for a health emergency, dangerous infrastructure damage or immediate danger."}
+      ],
+      "checklist": [
+        {"pl": "Sprawdzone oficjalne ostrzeżenie dla swojej okolicy", "en": "Official warning for your area checked"},
+        {"pl": "Naładowany telefon i plan kontaktu", "en": "Charged phone and contact plan"},
+        {"pl": "Domownicy i zwierzęta mają bezpieczne miejsce", "en": "Household members and pets have a safe place"},
+        {"pl": "Luźne przedmioty zabezpieczone z wyprzedzeniem, jeśli jest bezpiecznie", "en": "Loose objects secured in advance, if safe"}
+      ],
+      "avoid": [
+        {"pl": "Nie traktuj tego modułu jako źródła aktualnej prognozy ani lokalnego alertu.", "en": "Do not treat this module as a current forecast or local warning."},
+        {"pl": "Nie chowaj się pod drzewem podczas burzy i nie zbliżaj się do zerwanych przewodów.", "en": "Do not shelter under a tree during a storm or approach fallen wires."}
+      ],
+      "mistakes": [
+        {"pl": "Opieranie decyzji na starej prognozie albo niezweryfikowanym wpisie w mediach społecznościowych.", "en": "Relying on an old forecast or an unverified social media post."},
+        {"pl": "Pozostawianie dzieci lub zwierząt w nagrzanym samochodzie.", "en": "Leaving children or pets in a hot vehicle."},
+        {"pl": "Wychodzenie w teren mimo komunikatu, by pozostać w bezpiecznym miejscu.", "en": "Going outside despite instructions to shelter."}
+      ],
+      "sources": ["weather", "weatherAlerts", "handbook"]
+    },
+    {
+      "id": "gaz", "icon": "!", "title": {"pl": "Podejrzenie ulatniania się gazu", "en": "Suspected gas leak"},
+      "summary": {"pl": "Opuść zagrożone miejsce. Nie używaj ognia, przełączników ani telefonu wewnątrz.", "en": "Leave the danger area. Do not use flames, switches or a phone inside."},
+      "steps": [
+        {"pl": "Nie zapalaj ognia i nie włączaj ani nie wyłączaj urządzeń elektrycznych lub światła.", "en": "Do not create a flame or switch electrical devices or lights on or off."},
+        {"pl": "Jeśli możesz zrobić to natychmiast i bez ryzyka, ostrzeż innych. Opuść budynek; nie używaj telefonu w zagrożonym pomieszczeniu.", "en": "If you can do so immediately and safely, warn others. Leave the building; do not use a phone in the affected area."},
+        {"pl": "Z bezpiecznego miejsca zadzwoń pod 992 (pogotowie gazowe) albo 112, jeśli ktoś jest zagrożony lub sytuacja jest pilna.", "en": "From a safe place call 992 (gas emergency service), or 112 if anyone is in danger or the situation is urgent."},
+        {"pl": "Nie wracaj, dopóki służby nie potwierdzą, że jest bezpiecznie.", "en": "Do not return until responders confirm it is safe."}
+      ],
+      "checklist": [
+        {"pl": "Wszyscy opuścili zagrożone miejsce", "en": "Everyone has left the affected area"},
+        {"pl": "Połączenie wykonane z bezpiecznego miejsca", "en": "Call made from a safe location"},
+        {"pl": "Służby lub pogotowie gazowe poinformowane", "en": "Emergency or gas service informed"}
+      ],
+      "avoid": [
+        {"pl": "Nie używaj telefonu, dzwonka, światła, zapalniczki ani urządzeń elektrycznych w zagrożonym miejscu.", "en": "Do not use a phone, doorbell, light, lighter or electrical appliance in the affected area."},
+        {"pl": "Nie szukaj źródła wycieku i nie naprawiaj instalacji samodzielnie.", "en": "Do not search for the leak or attempt to repair the installation yourself."}
+      ],
+      "mistakes": [
+        {"pl": "Dzwonienie z wnętrza zagrożonego pomieszczenia.", "en": "Calling from inside the affected room."},
+        {"pl": "Włączanie lub wyłączanie światła i sprzętu.", "en": "Switching lights or appliances on or off."},
+        {"pl": "Powrót po rzeczy przed zgodą służb.", "en": "Going back for belongings before responders say it is safe."}
+      ],
+      "sources": ["gas", "emergency112"]
+    },
+    {
+      "id": "wypadek", "icon": "!", "title": {"pl": "Wypadek lub nagłe zagrożenie zdrowia", "en": "Accident or health emergency"},
+      "summary": {"pl": "Jeśli życie lub zdrowie jest zagrożone, zadzwoń 112. Asystent nie zastępuje dyspozytora ani ratownika.", "en": "If life or health is at risk, call 112. This assistant is not an emergency dispatcher or clinician."},
+      "steps": [
+        {"pl": "Zadbaj najpierw o własne bezpieczeństwo i nie wchodź w ruch uliczny, ogień, dym ani inne zagrożenie.", "en": "First protect yourself; do not enter traffic, fire, smoke or another hazard."},
+        {"pl": "Przy utracie przytomności, trudnościach z oddychaniem, poważnym urazie lub bezpośrednim zagrożeniu zadzwoń 112.", "en": "For unconsciousness, breathing difficulty, serious injury or immediate danger, call 112."},
+        {"pl": "Podaj operatorowi dokładne miejsce, co się stało i ile osób potrzebuje pomocy. Nie rozłączaj się, dopóki operator nie zakończy rozmowy.", "en": "Tell the operator the exact location, what happened and how many people need help. Stay on the line until instructed otherwise."},
+        {"pl": "Wykonuj polecenia dyspozytora. Nie podawaj leków ani nie przemieszczaj poszkodowanego, chyba że pozostanie na miejscu grozi mu bezpośrednie niebezpieczeństwo.", "en": "Follow the dispatcher’s instructions. Do not give medicines or move the injured person unless staying in place creates immediate danger."}
+      ],
+      "checklist": [
+        {"pl": "Miejsce zdarzenia opisane operatorowi", "en": "Location described to the operator"},
+        {"pl": "Liczba osób potrzebujących pomocy przekazana", "en": "Number of people needing help communicated"},
+        {"pl": "Dzieci, seniorzy i osoby z ograniczoną mobilnością uwzględnione", "en": "Children, older adults and people with limited mobility considered"}
+      ],
+      "avoid": [
+        {"pl": "Nie opóźniaj wezwania pomocy, aby wypełnić formularz lub zapytać AI.", "en": "Do not delay calling for help to fill in a form or ask AI."},
+        {"pl": "Nie wchodź w miejsce zagrożenia i nie udzielaj pomocy ponad swoje możliwości.", "en": "Do not enter a dangerous area or attempt help beyond your abilities."}
+      ],
+      "mistakes": [
+        {"pl": "Opisanie samego urazu bez podania dokładnej lokalizacji.", "en": "Describing the injury but not giving the exact location."},
+        {"pl": "Zakończenie rozmowy z operatorem przed jego instrukcją.", "en": "Ending the call before the operator instructs you to."},
+        {"pl": "Czekanie na odpowiedź asystenta zamiast wezwania pomocy.", "en": "Waiting for an assistant response instead of calling for help."}
+      ],
+      "sources": ["emergency112", "handbook"]
+    },
+    {
+      "id": "podejrzany", "icon": "!", "title": {"pl": "Podejrzany przedmiot lub zagrożenie publiczne", "en": "Suspicious object or public danger"},
+      "summary": {"pl": "Oddal się, nie dotykaj przedmiotu i powiadom służby z bezpiecznego miejsca.", "en": "Move away, do not touch the object and notify authorities from a safe place."},
+      "steps": [
+        {"pl": "Nie dotykaj, nie otwieraj ani nie przenoś podejrzanego przedmiotu.", "en": "Do not touch, open or move a suspicious object."},
+        {"pl": "Oddal się spokojnie. Ostrzeż inne osoby, aby się nie zbliżały, jeśli możesz zrobić to bezpiecznie.", "en": "Move away calmly. Warn others not to approach if you can do so safely."},
+        {"pl": "Z bezpiecznej odległości zadzwoń 112, podaj lokalizację i opisz, co zauważyłeś.", "en": "From a safe distance call 112, give the location and describe what you observed."},
+        {"pl": "Postępuj zgodnie z poleceniami służb i nie wracaj na miejsce.", "en": "Follow authorities’ instructions and do not return to the area."}
+      ],
+      "checklist": [
+        {"pl": "Bezpieczna odległość zachowana", "en": "A safe distance maintained"},
+        {"pl": "Osoby w pobliżu ostrzeżone bez narażania siebie", "en": "Nearby people warned without putting yourself at risk"},
+        {"pl": "Służby otrzymały lokalizację i opis", "en": "Authorities received the location and description"}
+      ],
+      "avoid": [
+        {"pl": "Nie dotykaj przedmiotu, nie fotografuj z bliska i nie publikuj niepotwierdzonych informacji.", "en": "Do not touch the object, approach it to take a photo or publish unverified claims."},
+        {"pl": "Nie blokuj dojazdu służbom i nie wracaj po rzeczy.", "en": "Do not block responders or return for belongings."}
+      ],
+      "mistakes": [
+        {"pl": "Podejście bliżej, aby obejrzeć lub sfotografować przedmiot.", "en": "Moving closer to inspect or photograph the object."},
+        {"pl": "Przenoszenie przedmiotu w inne miejsce.", "en": "Moving the object elsewhere."},
+        {"pl": "Rozsyłanie plotek zamiast przekazania informacji służbom.", "en": "Spreading rumours instead of reporting observations to authorities."}
+      ],
+      "sources": ["suspicious", "emergency112"]
+    },
+    {
+      "id": "chemiczne", "icon": "!", "title": {"pl": "Podejrzenie skażenia lub zagrożenia chemicznego", "en": "Suspected contamination or chemical hazard"},
+      "summary": {"pl": "Nie zbliżaj się do źródła. Sposób schronienia lub ewakuacji ustalają aktualne komunikaty służb.", "en": "Stay away from the source. Follow current authority instructions on sheltering or evacuation."},
+      "steps": [
+        {"pl": "Oddal się od widocznego źródła zagrożenia bez dotykania substancji i ostrzeż innych, jeśli to bezpieczne.", "en": "Move away from the visible source without touching the substance and warn others if safe."},
+        {"pl": "Zadzwoń 112 z bezpiecznego miejsca i opisz oznaczenia, lokalizację oraz objawy, jeśli występują.", "en": "Call 112 from a safe place and describe labels, location and any symptoms."},
+        {"pl": "Wykonuj komunikaty służb: mogą zalecić pozostanie w budynku albo ewakuację. Nie wybieraj samodzielnie trasy przez strefę zagrożenia.", "en": "Follow official instructions: authorities may direct you to shelter indoors or evacuate. Do not choose a route through the hazard area yourself."},
+        {"pl": "Nie jedz ani nie pij produktów, które mogły zostać skażone. Czekaj na dalsze oficjalne wskazówki.", "en": "Do not eat or drink items that may be contaminated. Wait for further official guidance."}
+      ],
+      "checklist": [
+        {"pl": "Źródło zagrożenia opisane służbom bez zbliżania się", "en": "Hazard source described to authorities without approaching"},
+        {"pl": "Oficjalny komunikat o schronieniu lub ewakuacji sprawdzony", "en": "Official shelter or evacuation instructions checked"},
+        {"pl": "Domownicy i osoby potrzebujące wsparcia poinformowane", "en": "Household and people needing support informed"}
+      ],
+      "avoid": [
+        {"pl": "Nie dotykaj, nie wąchaj ani nie pobieraj próbek nieznanej substancji.", "en": "Do not touch, smell or collect samples of an unknown substance."},
+        {"pl": "Nie zakładaj, że AI lub zdjęcie potrafi zidentyfikować substancję albo ocenić bezpieczeństwo miejsca.", "en": "Do not assume AI or a photo can identify a substance or determine whether an area is safe."}
+      ],
+      "mistakes": [
+        {"pl": "Wybór schronienia lub drogi bez sprawdzenia poleceń służb.", "en": "Choosing shelter or a route without checking official instructions."},
+        {"pl": "Dotykanie substancji albo wchodzenie w chmurę lub rozlewisko.", "en": "Touching a substance or entering a cloud or spill."},
+        {"pl": "Spożywanie wody lub żywności, co do których jest podejrzenie skażenia.", "en": "Consuming water or food suspected of contamination."}
+      ],
+      "sources": ["chemical", "handbook", "emergency112"]
+    },
+    {
+      "id": "ewakuacja", "icon": "!", "title": {"pl": "Ewakuacja budynku lub okolicy", "en": "Building or area evacuation"},
+      "summary": {"pl": "Jeśli istnieje bezpośrednie zagrożenie, nie zwlekaj. Stosuj się do poleceń służb.", "en": "If there is immediate danger, do not delay. Follow instructions from authorities."},
+      "steps": [
+        {"pl": "Zabierz ludzi i zwierzęta, jeśli możesz zrobić to bezpiecznie. Nie czekaj na skompletowanie rzeczy.", "en": "Take people and pets with you if safe. Do not wait to collect belongings."},
+        {"pl": "Użyj wskazanej drogi ewakuacji i kieruj się do miejsca wyznaczonego przez służby.", "en": "Use the indicated evacuation route and go to the place designated by authorities."},
+        {"pl": "Weź gotowy plecak, telefon i niezbędne pomoce. Pomóż osobom potrzebującym wsparcia, jeśli nie narażasz siebie.", "en": "Take your prepared bag, phone and essential aids. Assist people who need help if you do not put yourself at risk."},
+        {"pl": "Nie wracaj do strefy ewakuacji bez zgody służb. W bezpośrednim zagrożeniu zadzwoń 112.", "en": "Do not return to an evacuated area without permission. Call 112 in immediate danger."}
+      ],
+      "checklist": [
+        {"pl": "Domownicy zebrani i liczba osób sprawdzona", "en": "Household gathered and everyone accounted for"},
+        {"pl": "Plecak i niezbędne leki zabrane, o ile są pod ręką", "en": "Go-bag and essential medicines taken if immediately available"},
+        {"pl": "Dzieci, osoby z ograniczoną mobilnością i zwierzęta uwzględnione", "en": "Children, people with limited mobility and pets considered"},
+        {"pl": "Trasa i miejsce zbiórki zgodne z poleceniem służb", "en": "Route and assembly point follow official instructions"}
+      ],
+      "avoid": [
+        {"pl": "Nie używaj windy podczas ewakuacji pożarowej.", "en": "Do not use lifts during a fire evacuation."},
+        {"pl": "Nie blokuj dróg ewakuacyjnych i nie wracaj po przedmioty.", "en": "Do not block escape routes or go back for belongings."}
+      ],
+      "mistakes": [
+        {"pl": "Odkładanie wyjścia, aby dokończyć pakowanie.", "en": "Delaying departure to finish packing."},
+        {"pl": "Rozdzielenie domowników bez uzgodnionego miejsca kontaktu.", "en": "Separating household members without an agreed contact point."},
+        {"pl": "Powrót do zamkniętej strefy bez zgody służb.", "en": "Returning to a closed area without authority approval."}
+      ],
+      "sources": ["rcbEvacuation", "handbook", "emergency112"]
+    },
+    {
+      "id": "woda", "icon": "!", "title": {"pl": "Awaria wody", "en": "Water outage"},
+      "summary": {"pl": "Sprawdź komunikat lokalnego dostawcy wody i używaj jej zgodnie z zaleceniami służb.", "en": "Check your local water utility's updates and use water according to official guidance."},
+      "steps": [
+        {"pl": "Sprawdź komunikat lokalnego wodociągu i władz. Ten moduł nie zna awarii ani jakości wody w Twojej okolicy.", "en": "Check your local water utility and authority updates. This module does not know about local outages or water quality."},
+        {"pl": "Jeśli władze zalecą ograniczenie lub nieużywanie wody, zastosuj się do instrukcji. Nie zakładaj, że gotowanie zawsze rozwiązuje problem.", "en": "If authorities advise limiting or avoiding water use, follow their instructions. Do not assume boiling always makes it safe."},
+        {"pl": "Użyj zapasu wody pitnej, jeśli go masz, i zapytaj dostawcę o punkt dystrybucji.", "en": "Use stored drinking water if available and ask the utility about distribution points."},
+        {"pl": "Przy zagrożeniu zdrowia lub braku bezpiecznej wody dla osoby wymagającej pilnej pomocy skontaktuj się z odpowiednimi służbami; w nagłym zagrożeniu dzwoń 112.", "en": "If health is at risk or someone urgently needs safe water, contact the relevant services; call 112 for an emergency."}
+      ],
+      "checklist": [
+        {"pl": "Komunikat lokalnego dostawcy sprawdzony", "en": "Local utility update checked"},
+        {"pl": "Zapas wody pitnej dostępny", "en": "Drinking water available"},
+        {"pl": "Domownicy potrzebujący szczególnej pomocy uwzględnieni", "en": "Household members needing extra support considered"}
+      ],
+      "avoid": [
+        {"pl": "Nie pij wody, której bezpieczeństwo zostało zakwestionowane w oficjalnym komunikacie.", "en": "Do not drink water that an official notice says may be unsafe."},
+        {"pl": "Nie polegaj na nieoficjalnym wpisie ani poradzie AI zamiast lokalnego komunikatu.", "en": "Do not rely on an unofficial post or AI advice instead of local instructions."}
+      ],
+      "mistakes": [
+        {"pl": "Brak sprawdzenia komunikatu lokalnego dostawcy.", "en": "Not checking the local utility's notice."},
+        {"pl": "Samodzielne uznanie wody za bezpieczną bez oficjalnej informacji.", "en": "Assuming water is safe without official information."},
+        {"pl": "Nieuważne zużywanie małego zapasu wody pitnej.", "en": "Using a limited drinking-water supply without planning."}
+      ],
+      "sources": ["handbook", "rcbHazards"]
+    }
+  ],
+  "backpack": [
+    {"id": "documents", "text": {"pl": "Dokumenty i kopie dokumentów", "en": "Documents and copies"}},
+    {"id": "water", "text": {"pl": "Woda pitna i sposób jej bezpiecznego przechowywania", "en": "Drinking water and safe storage"}},
+    {"id": "food", "text": {"pl": "Trwała żywność dla domowników", "en": "Non-perishable food for household members"}},
+    {"id": "firstaid", "text": {"pl": "Apteczka pierwszej pomocy", "en": "First-aid kit"}},
+    {"id": "medication", "text": {"pl": "Regularnie potrzebne leki, jeśli dotyczy", "en": "Regular medicines, if needed"}, "profile": "medicines"},
+    {"id": "flashlight", "text": {"pl": "Latarka i zapas baterii", "en": "Flashlight and spare batteries"}},
+    {"id": "powerbank", "text": {"pl": "Naładowany powerbank, przewody i ładowarka", "en": "Charged power bank, cables and charger"}},
+    {"id": "radio", "text": {"pl": "Radio na baterie lub korbkę", "en": "Battery- or crank-powered radio"}},
+    {"id": "clothes", "text": {"pl": "Ubrania odpowiednie do pogody i środki higieniczne", "en": "Weather-appropriate clothes and hygiene supplies"}},
+    {"id": "cash", "text": {"pl": "Gotówka w małych nominałach", "en": "Cash in small denominations"}},
+    {"id": "children", "text": {"pl": "Rzeczy potrzebne dzieciom", "en": "Children's essentials"}, "profile": "children"},
+    {"id": "mobility", "text": {"pl": "Pomoce mobilnościowe i plan wsparcia", "en": "Mobility aids and support plan"}, "profile": "mobility"},
+    {"id": "seniors", "text": {"pl": "Rzeczy potrzebne seniorom", "en": "Older adults' essentials"}, "profile": "seniors"},
+    {"id": "medicalEquipment", "text": {"pl": "Niezbędny sprzęt medyczny lub pomocniczy, jeśli dotyczy", "en": "Essential medical or assistive equipment, if needed"}, "profile": "equipment"},
+    {"id": "pets", "text": {"pl": "Transporter/smycz, woda i karma dla zwierząt", "en": "Pet carrier/leash, water and food"}, "profile": "pets"}
+  ]
+}

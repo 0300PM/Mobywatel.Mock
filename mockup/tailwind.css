@@ -1,0 +1,7 @@
+@import "tailwindcss/theme.css";
+@import "tailwindcss/utilities.css";
+@theme prefix(tw) {}
+@source "./index.html";
+@source "./komputer.html";
+@source "./*.js";
+@source not "../docs";

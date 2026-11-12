@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="tailwind.generated.css?v=1">
-<link rel="stylesheet" href="style.css?v=26">
+<link rel="stylesheet" href="style.css?v=29">
 <link rel="stylesheet" href="modules.css?v=2">
 <link rel="stylesheet" href="safety.css?v=1">
 </head>
@@ -36,7 +36,7 @@
   <button class="title" id="title" aria-haspopup="dialog" aria-expanded="false" aria-controls="lmenu">Dokumenty<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 9.5 5.5 5.5 5.5-5.5"/></svg></button>
   <div class="lmenu" id="lmenu" inert><div class="scrim"></div><div class="panel" role="dialog" aria-modal="true" aria-label="Układ dokumentów i osoba"><button class="menu-back" id="menuBack" lang="pl" data-t="0" type="button">Wstecz</button><div class="mh">Układ dokumentów</div><div class="ml"></div><div class="mh">Osoba w pokazie</div><div class="mo"></div></div></div>
 
-  <div class="hmenu" id="hmenu" inert><div class="scrim"></div><div class="panel" role="dialog" aria-modal="true" aria-label="Historia rozmów"><div class="hh"><button id="historyBack" class="menu-back" lang="pl" data-t="0" type="button">Wstecz</button><span>Rozmowy</span><button id="hnew" type="button">+ Nowa rozmowa</button></div><div class="hl" id="hlist" data-t="0"></div></div></div>
+  <div class="hmenu" id="hmenu" inert><div class="scrim"></div><div class="panel" role="dialog" aria-modal="true" aria-label="Historia rozmów"><div class="hh"><button id="historyBack" class="menu-back" lang="pl" data-t="0" type="button">Wstecz</button><span>Rozmowy</span><button id="hnew" type="button">+ Nowa rozmowa</button></div><p class="hnote">Historia zapisuje się na tym urządzeniu.</p><button class="hclear" id="clearHistory" lang="pl" data-t="0" type="button" hidden>Wyczyść historię</button><div class="hl" id="hlist" data-t="0"></div></div></div>
 
   <main class="home-content" id="homeContent" aria-label="Dokumenty i przypomnienia">
   <div class="home-features" id="homeFeatures" lang="pl" data-t="0">
@@ -78,11 +78,11 @@
     <div class="assist-nav"><button type="button" class="assist-back" id="letterBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg>Wstecz</button><h2 id="letterTitle">Tłumacz pism urzędowych</h2><span></span></div>
     <div class="assist-scroll" id="letterScroll">
       <p class="assist-kicker">PROSTYM JĘZYKIEM</p><h3 class="assist-heading">Zrozum pismo krok po kroku</h3>
-      <p class="assist-intro">Dodaj PDF z tekstem albo plik TXT. Najpierw pokażemy odczytany tekst, żebyś mógł go sprawdzić i usunąć dane osobowe.</p>
+      <p class="assist-intro">Dodaj PDF z tekstem, plik TXT albo zdjęcie pisma. Najpierw pokażemy rozpoznany tekst, żebyś mógł go sprawdzić i usunąć dane osobowe.</p>
       <div class="assist-card">
-        <label for="letterFile">Wybierz pismo (PDF lub TXT, maks. 4 MiB)</label>
-        <input id="letterFile" type="file" accept=".pdf,.txt,application/pdf,text/plain" aria-describedby="letterFileHint letterStatus">
-        <p class="field-hint" id="letterFileHint">Skanów i zdjęć nie obsługujemy. OCR nie jest dostępny.</p>
+        <label for="letterFile">Wybierz pismo (PDF, TXT lub zdjęcie JPG, PNG, WEBP, maks. 4 MiB)</label>
+        <input id="letterFile" type="file" accept=".pdf,.txt,.jpg,.jpeg,.png,.webp,application/pdf,text/plain,image/jpeg,image/png,image/webp" aria-describedby="letterFileHint letterStatus">
+        <p class="field-hint" id="letterFileHint">Skan i zdjęcie rozpoznajemy automatycznie (OCR) na serwerze projektu. Jakość zależy od ostrości i oświetlenia, dlatego zawsze sprawdź rozpoznany tekst i popraw go ręcznie. Rozpoznany tekst nie jest wysyłany do modelu AI, dopóki nie zaznaczysz zgody.</p>
         <label for="letterText">Treść do wyjaśnienia</label>
         <textarea id="letterText" rows="8" maxlength="30000" autocomplete="off" spellcheck="true" aria-describedby="letterPrivacy letterStatus" placeholder="Możesz też wkleić tekst pisma"></textarea>
         <p class="field-hint" id="letterPrivacy">Plik jest odczytywany przez serwer projektu i nie jest zapisywany przez tę funkcję. Analiza wysyła widoczny tekst do skonfigurowanego modelu AI. Przed wysłaniem usuń PESEL, adres i inne dane, których nie chcesz udostępniać. Obowiązują zasady dostawcy modelu.</p>
@@ -122,6 +122,7 @@
 
   <form class="composer" id="composer">
     <div class="composer-heading" lang="pl" data-t="0"><label class="composer-label" for="prompt">Wpisz, czego potrzebujesz</label><button type="button" id="showSuggestions">Pokaż propozycje</button></div>
+    <div class="agent-state" lang="pl" data-t="0"><span id="agentStatus" role="status" aria-live="polite">Sprawdzam połączenie z modelem AI.</span><button type="button" id="retryAgent" class="text-action" hidden>Sprawdź ponownie</button></div>
     <div class="bar">
       <button type="button" class="ib" id="cam" lang="pl" data-t="0" aria-label="Odczyt zdjęcia dokumentu — niedostępny"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3l1.8-2.5h6.4L17 8.5h3V19H4z"/><circle cx="12" cy="13.5" r="3.4"/></svg></button>
       <input id="prompt" type="text" placeholder="Co chcesz załatwić?" enterkeyhint="send">
@@ -240,7 +241,7 @@
       </section>
       <section id="reminderScreen" class="assist-subscreen" hidden aria-labelledby="reminderTitle">
         <p class="assist-kicker">PRZYKŁADOWE PRZYPOMNIENIE</p><h3 class="assist-heading" id="reminderTitle" tabindex="-1">Dowód osobisty</h3><p class="assist-intro">Sprawdź termin ważności dokumentu.</p>
-        <div class="assist-card"><p class="reminder-date-label">Przykładowy termin ważności</p><p class="reminder-date" id="exampleDate"></p><details><summary>Co to znaczy?</summary><p>Termin ważności to data, do której dokument jest ważny, o ile nie zostanie wcześniej unieważniony.</p></details><p>To fikcyjne dane pokazowe. Prototyp nie sprawdza rejestrów ani nie wysyła powiadomień.</p></div>
+        <div class="assist-card"><p class="reminder-date-label">Przykładowy termin ważności</p><p class="reminder-date" id="exampleDate"></p><details><summary>Co to znaczy?</summary><p>Termin ważności to data, do której dokument jest ważny, o ile nie zostanie wcześniej unieważniony.</p></details><p>To fikcyjne dane pokazowe. Prototyp nie sprawdza rejestrów ani nie wysyła powiadomień.</p><p><b>To nie jest aktywne przypomnienie.</b> Nic nie zapisano i nie ustawiono alarmu — kartę otwierasz samodzielnie. Jeśli chcesz powiadomienie, ustaw je w kalendarzu telefonu albo w oficjalnej aplikacji, która je wysyła.</p></div>
         <button class="assist-button primary wide" id="openExampleDocument" type="button">Otwórz przykładowy dokument</button>
       </section>
     </div>
@@ -254,17 +255,17 @@
 </div>
 <script src="osoby.js?v=21"></script>
 <script src="sylwetki.js?v=19"></script>
-<script src="core.js?v=22"></script>
+<script src="core.js?v=110"></script>
 <script src="variants.js?v=21"></script>
-<script src="scenarios.js?v=23"></script>
-<script src="agent.js?v=28"></script>
+<script src="scenarios.js?v=24"></script>
+<script src="agent.js?v=86"></script>
 <script src="znak-kod.js?v=19"></script>
 <script src="znak.js?v=23"></script>
-<script src="accessibility.js?v=2"></script>
+<script src="accessibility.js?v=3"></script>
 <script src="preferences.js?v=1"></script>
-<script src="places.js?v=1"></script>
+<script src="places.js?v=2"></script>
 <script src="lmstudio.js?v=1"></script>
-<script src="modules.js?v=1"></script>
+<script src="modules.js?v=2"></script>
 <script src="safety.js?v=1"></script>
 </body>
 </html>

@@ -51,24 +51,47 @@ function fileBase64(file){
   reader.readAsArrayBuffer(file);
  });
 }
+function letterQuality(text){
+ const compact=text.replace(/\s+/g,''),letters=(compact.match(/[\p{L}]/gu)||[]).length,suspicious=(compact.match(/[\uFFFD|_~^{}<>\\]/g)||[]).length;
+ if(!compact)return 'empty';
+ const ratio=letters/compact.length;
+ if(ratio<0.5||suspicious/Math.max(1,letters)>0.15)return 'low';
+ if(ratio<0.7)return 'medium';
+ return 'good';
+}
+const letterQualityNotes={
+ empty:'Odczytany tekst jest pusty. Spróbuj innego pliku albo wpisz treść ręcznie.',
+ low:'Jakość odczytu jest niska. Sprawdź tekst znak po znaku i popraw go ręcznie przed analizą.',
+ medium:'Odczyt mógł pominąć część znaków. Porównaj tekst z dokumentem i popraw błędy przed analizą.',
+ good:'Sprawdź tekst, usuń dane osobowe i zaznacz zgodę dopiero przed analizą.'
+};
+function applyLetterText(text){
+ const value=typeof text==='string'?text.trim():'';
+ $('#letterText').value=value;
+ $('#letterResults').replaceChildren();
+ $('#letterConsent').checked=false;
+ const quality=letterQuality(value);
+ setLetterStatus((value?`Odczytano ${value.length.toLocaleString('pl-PL')} znaków. `:'')+letterQualityNotes[quality]);
+ return quality;
+}
 async function extractLetter(){
  const file=$('#letterFile').files?.[0];
- if(!file){setLetterStatus('Najpierw wybierz plik PDF albo TXT.');$('#letterFile').focus();return}
+ if(!file){setLetterStatus('Najpierw wybierz plik PDF, TXT albo zdjęcie.');$('#letterFile').focus();return}
  if(file.size>4*1024*1024){setLetterStatus('Plik przekracza limit 4 MiB.');return}
- const button=$('#extractLetter');button.disabled=true;setLetterStatus('Odczytuję plik. Tekst nie jest jeszcze wysyłany do modelu AI.');
+ if(!/^(image\/(jpeg|png|webp)|application\/pdf|text\/plain)$/.test(file.type||'')&&!/\.(jpe?g|png|webp|pdf|txt)$/i.test(file.name)){setLetterStatus('Obsługujemy PDF, TXT oraz zdjęcia JPG, PNG i WEBP.');return}
+ const button=$('#extractLetter');button.disabled=true;
+ setLetterStatus('Odczytuję plik. Tekst nie jest jeszcze wysyłany do modelu AI.');
  try{
   const data=await fileBase64(file);
-  const result=await postJson('/api/letter/extract',{filename:file.name,data});
-  $('#letterText').value=result.text;
-  $('#letterResults').replaceChildren();
-  $('#letterConsent').checked=false;
-  setLetterStatus(`Odczytano ${result.text.length.toLocaleString('pl-PL')} znaków. Sprawdź tekst, usuń dane osobowe i zaznacz zgodę dopiero przed analizą.`);
-  $('#letterText').focus();
+  const result=await postJson('/api/letter/extract',{filename:file.name,type:file.type||'',data});
+  const quality=applyLetterText(result.text);
+  if(quality!=='empty'&&!$('#letterText').value)$('#letterFile').focus();
+  else $('#letterText').focus();
  }catch(error){setLetterStatus(error.message||'Nie udało się odczytać pliku.')}
  finally{button.disabled=false}
 }
 $('#extractLetter').addEventListener('click',extractLetter);
-$('#letterFile').addEventListener('change',()=>setLetterStatus($('#letterFile').files?.[0]?.name?`Wybrano plik: ${$('#letterFile').files[0].name}. Wybierz „Odczytaj wybrany plik”, aby zobaczyć tekst.`:''));
+$('#letterFile').addEventListener('change',()=>setLetterStatus($('#letterFile').files?.[0]?.name?`Wybrano plik: ${$('#letterFile').files[0].name}. Wybierz „Odczytaj wybrany plik”, aby zobaczyć rozpoznany tekst.`:''));
 
 function appendText(parent,tag,text,className){
  const node=document.createElement(tag);

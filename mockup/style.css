@@ -109,6 +109,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-of
 .ui .flag{margin:4px 16px 12px;padding:10px 12px;border-radius:12px;background:var(--warn-wash);color:var(--warn);font-size:13.5px;line-height:19px}
 .ui .src{display:flex;align-items:center;gap:6px;padding:9px 16px 11px;border-top:1px solid var(--hair);font-size:12px;color:var(--ink3)}
 .ui .src svg{width:13px;height:13px}
+.ui .src.src-hint{border-top:0;padding-top:0;font-size:11.5px;line-height:1.4}
 .ui .actions{display:flex;gap:8px;padding:6px 16px 16px}
 .btn{flex:1;height:48px;border-radius:14px;font-weight:600;font-size:16px;letter-spacing:-.01em}
 .btn.primary{background:var(--red);color:#fff}
@@ -347,6 +348,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--red);outline-of
 .hmenu .hr i{width:8px;height:8px;border-radius:50%;background:var(--red)}
 .hmenu .unread b{font-weight:700}
 .hempty{padding:18px 12px 20px;font-size:14px;color:var(--ink2)}
+.hmenu .hnote{margin:0;padding:0 12px 6px;font-size:12px;line-height:1.4;color:var(--ink2)}
+.hmenu .hclear{margin:0 6px 2px;min-height:40px;padding:8px 12px;border-radius:12px;background:#f2f3f7;color:var(--red-dark);font:inherit;font-size:14px;font-weight:600;text-align:left}
+.hmenu .hclear:disabled{opacity:.55}
 
 /* ---------- wersja 2: spokojniejszy ekran główny ---------- */
 .title{left:62px;font-size:22px;line-height:40px;letter-spacing:-.015em;font-weight:700}
@@ -682,6 +686,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-vi
 .carousel-nav button:disabled{color:#737782}
 .carousel-nav .dots{margin:0}
 @media (prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}*{scroll-behavior:auto!important}}
+.agent-state{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 16px 6px;color:var(--ink2);font-size:12px;line-height:1.4}
+.agent-state .text-action{font-size:12px}
 .chat-notice{align-self:flex-start;margin:0 16px 2px;padding:3px 0;color:var(--ink2);font-size:12px;line-height:1.4;text-align:left;text-decoration:underline;text-underline-offset:2px}
 .card-open{position:absolute;inset:0;width:100%;height:100%;border-radius:inherit;z-index:1}
 .card:focus-within{z-index:30!important}
@@ -810,7 +816,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-vi
 .access-contrast :is(button,input,textarea,select,summary,a):focus-visible{outline:4px solid #0050af;outline-offset:2px}
 .phone[data-font="large"]{--access-font:18px;--access-heading:24px}
 .phone[data-font="extra"]{--access-font:20px;--access-heading:27px}
-.phone:is([data-font="large"],[data-font="extra"]) :is(button,input,textarea,select,p,li,dt,dd,small,label,summary,.msg,.assist-card,.composer-label,.chat-notice,.assist-kicker,.review-warning,.review-trust,.note,.src,.map-attribution,.map-status,.map-data-note,.place-detail-row){font-size:var(--access-font)!important;line-height:1.4!important;letter-spacing:normal}
+.phone:is([data-font="large"],[data-font="extra"]) :is(button,input,textarea,select,p,li,dt,dd,small,label,summary,.msg,.assist-card,.composer-label,.chat-notice,.assist-kicker,.review-warning,.review-trust,.note,.src,.map-attribution,.map-status,.map-data-note,.place-detail-row,.agent-state){font-size:var(--access-font)!important;line-height:1.4!important;letter-spacing:normal}
 .phone:is([data-font="large"],[data-font="extra"]) :is(h2,h3,h4,.doc-title){font-size:var(--access-heading)!important;line-height:1.2!important;overflow-wrap:anywhere}
 .phone:is([data-font="large"],[data-font="extra"]) .title{font-size:30px!important;line-height:1.2!important}
 .phone:is([data-font="large"],[data-font="extra"]) :is(button:not(.card-open):not(.map-marker),input:not([type="radio"]),select,textarea,summary){min-height:52px}

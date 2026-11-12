@@ -93,9 +93,14 @@ function voiceHealth(){
  if(!healthPromise)healthPromise=fetch('/api/health',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})).finally(()=>{healthPromise=null});
  return healthPromise;
 }
-const dictation={phase:'idle',generation:0,recorder:null,stream:null,recognition:null,request:null};
+const DICTATION_MAX_MS=60000,DICTATION_MAX_BYTES=4*1024*1024,DICTATION_MAX_TRIES=2;
+const dictation={phase:'idle',generation:0,recorder:null,stream:null,recognition:null,request:null,timer:null,tries:0};
+function stopDictationTimer(){if(dictation.timer){clearTimeout(dictation.timer);dictation.timer=null}}
+function finishRecording(){if(dictation.recorder?.state==='recording')dictation.recorder.stop();else if(dictation.recognition)dictation.recognition.stop()}
+function startDictationTimer(){stopDictationTimer();dictation.timer=setTimeout(()=>{if(dictation.phase!=='recording')return;finishRecording()},DICTATION_MAX_MS)}
 function dictationState(phase,message){
  dictation.phase=phase;
+ if(phase!=='recording')stopDictationTimer();
  const button=$('#dictate');
  button.textContent=phase==='recording'?'Zakończ nagrywanie':phase==='processing'?'Rozpoznaję…':phase==='requesting'?'Uruchamiam mikrofon…':'Powiedz, czego potrzebujesz';
  button.disabled=phase==='requesting'||phase==='processing';
@@ -112,6 +117,7 @@ function appendDictation(text){
 }
 function releaseStream(){if(dictation.stream){dictation.stream.getTracks().forEach(track=>track.stop());dictation.stream=null}}
 function cancelDictation(){
+ stopDictationTimer();
  ++dictation.generation;
  if(dictation.request)dictation.request.abort();
  dictation.request=null;
@@ -120,10 +126,17 @@ function cancelDictation(){
  dictation.recorder=null;releaseStream();
  dictationState('idle','Nagrywanie anulowane. Możesz wpisać wiadomość.');
 }
+function microphoneError(error){
+ if(error?.name==='NotAllowedError'||error?.name==='SecurityError')return 'Brak zgody na mikrofon. Zezwól na dostęp w ustawieniach przeglądarki albo wpisz wiadomość.';
+ if(error?.name==='NotFoundError'||error?.name==='DevicesNotFoundError')return 'Nie znaleziono mikrofonu. Podłącz urządzenie albo wpisz wiadomość.';
+ if(error?.name==='NotReadableError'||error?.name==='TrackStartError')return 'Mikrofon jest zajęty przez inną aplikację. Zwolnij go albo wpisz wiadomość.';
+ return 'Mikrofon nie jest dostępny w tej przeglądarce. Wpisz wiadomość ręcznie.';
+}
 async function recordOnServer(generation){
+ if(!window.isSecureContext){dictationState('idle','Mikrofon działa tylko przez HTTPS albo na localhost. Wpisz wiadomość ręcznie.');return}
  let stream;
  try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}
- catch(e){if(generation===dictation.generation)dictationState('idle','Nie ma dostępu do mikrofonu. Sprawdź uprawnienia albo wpisz wiadomość.');return}
+ catch(e){if(generation===dictation.generation)dictationState('idle',microphoneError(e));return}
  if(generation!==dictation.generation){stream.getTracks().forEach(track=>track.stop());return}
  dictation.stream=stream;
  let recorder;
@@ -138,16 +151,26 @@ async function recordOnServer(generation){
   if(!chunks.length){dictationState('idle','Nie zapisano dźwięku. Spróbuj ponownie albo wpisz wiadomość.');return}
   dictationState('processing','Rozpoznaję nagranie. Poczekaj na tekst do sprawdzenia.');
   const blob=new Blob(chunks,{type:(recorder.mimeType||'audio/webm').split(';')[0]});
-  const controller=new AbortController();dictation.request=controller;
+  if(blob.size>DICTATION_MAX_BYTES){dictationState('idle','Nagranie jest za duże. Nagraj krótszą wypowiedź albo wpisz wiadomość.');return}
+  const controller=new AbortController();dictation.request=controller;dictation.tries=0;
   try{
-   const response=await fetch('/api/stt?lang=pl',{method:'POST',headers:{'Content-Type':blob.type},body:blob,signal:controller.signal});
-   const result=await response.json();
-   if(!response.ok)throw new Error('stt');
-   if(generation===dictation.generation)appendDictation(result.text||'');
-  }catch(e){if(generation===dictation.generation)dictationState('idle','Nie udało się rozpoznać nagrania. Spróbuj ponownie albo wpisz wiadomość.');}
+   for(dictation.tries=1;dictation.tries<=DICTATION_MAX_TRIES;dictation.tries++){
+    const response=await fetch('/api/stt?lang=pl',{method:'POST',headers:{'Content-Type':blob.type},body:blob,signal:controller.signal});
+    const result=await response.json().catch(()=>({}));
+    if(response.ok){
+     if(generation===dictation.generation)appendDictation(result.text||'');
+     return;
+    }
+    if(response.status<500&&response.status!==429)throw new Error('stt');
+    if(dictation.tries<DICTATION_MAX_TRIES)dictationState('processing','Rozpoznawanie mowy nie odpowiedziało. Ponawiam raz.');
+   }
+   throw new Error('stt');
+  }catch(e){
+   if(generation===dictation.generation&&e.name!=='AbortError')dictationState('idle','Nie udało się rozpoznać nagrania. Spróbuj ponownie albo wpisz wiadomość.');
+  }
   finally{if(dictation.request===controller)dictation.request=null}
  };
- try{recorder.start();dictationState('recording','Mikrofon nagrywa. Gdy skończysz, wybierz „Zakończ nagrywanie”.')}
+ try{recorder.start();dictationState('recording','Mikrofon nagrywa. Gdy skończysz, wybierz „Zakończ nagrywanie”. Nagranie zatrzyma się po minucie.');startDictationTimer()}
  catch(e){releaseStream();dictation.recorder=null;dictationState('idle','Nagrywanie nie jest dostępne. Wpisz wiadomość ręcznie.')}
 }
 function recordInBrowser(generation,Recognition){
@@ -155,15 +178,16 @@ function recordInBrowser(generation,Recognition){
  const recognition=new Recognition();dictation.recognition=recognition;
  recognition.lang='pl-PL';recognition.continuous=false;recognition.interimResults=false;
  recognition.onresult=event=>{heard=Array.from(event.results).filter(result=>result.isFinal).map(result=>result[0].transcript).join(' ')};
- recognition.onerror=()=>{if(generation!==dictation.generation)return;dictation.recognition=null;dictationState('idle','Nie udało się skorzystać z mikrofonu. Sprawdź uprawnienia lub wpisz wiadomość.')};
+ recognition.onerror=event=>{if(generation!==dictation.generation)return;dictation.recognition=null;dictationState('idle',event?.error==='not-allowed'||event?.error==='service-not-allowed'?'Brak zgody na mikrofon. Zezwól na dostęp w ustawieniach przeglądarki albo wpisz wiadomość.':'Nie udało się rozpoznać mowy. Spróbuj ponownie albo wpisz wiadomość.')};
  recognition.onend=()=>{if(generation!==dictation.generation||dictation.recognition!==recognition)return;dictation.recognition=null;appendDictation(heard)};
- try{recognition.start();dictationState('recording','Mikrofon słucha. Gdy skończysz, wybierz „Zakończ nagrywanie”.')}
+ try{recognition.start();dictationState('recording','Mikrofon słucha. Gdy skończysz, wybierz „Zakończ nagrywanie”. Nagranie zatrzyma się po minucie.');startDictationTimer()}
  catch(e){dictation.recognition=null;dictationState('idle','Rozpoznawanie mowy nie jest dostępne. Wpisz wiadomość ręcznie.')}
 }
 async function startDictation(){
  if(dictation.phase==='recording'){
   if(dictation.recorder?.state==='recording')dictation.recorder.stop();
   else if(dictation.recognition){dictationState('processing','Rozpoznaję wypowiedź.');dictation.recognition.stop()}
+  else dictationState('idle','Nagrywanie już się zakończyło. Sprawdź tekst w polu wiadomości albo wpisz ją ręcznie.');
   return;
  }
  if(dictation.phase!=='idle')return;

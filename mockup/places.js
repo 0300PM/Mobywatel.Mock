@@ -13,7 +13,8 @@ const placeKinds={
  roads:{label:'Drogi wojewódzkie',words:'drogi wojewodzkie zarzad drog wojewodzkich',hint:'Sprawdź właściwy zarząd dróg dla danej drogi i województwa.'},
  atm:{label:'Bankomat',words:'bankomat gotowka wyplata',hint:'Wybierz bankomat. Dostępność urządzenia i ewentualne opłaty potwierdź na miejscu.'}
 };
-const placesState={center:null,zoom:13,places:[],visible:[],selected:null,controller:null,generation:0,drag:null,drawFrame:0};
+const PLACE_TIMEOUT=35000,PLACE_QUERY_MIN=3,PLACE_FILTER_DELAY=180,PLACE_LIMIT=200,PLACE_RADIUS_KM=6,PLACE_ATTEMPTS=2;
+const placesState={center:null,zoom:13,places:[],visible:[],selected:null,controller:null,generation:0,drag:null,drawFrame:0,fetchedAt:0,filterTimer:0};
 const mapPanel=$('#mapPanel'),mapCanvas=$('#placeMap');
 let mapReturn=null;
 function openMap(){mapReturn=document.activeElement;mapPanel.classList.add('on');syncAccessibility();if(placesState.center)requestAnimationFrame(drawPlaceMap)}
@@ -94,18 +95,48 @@ function finishPlaceRequest(request){
 }
 function placeError(error,request){
  if(request.generation!==placesState.generation)return;
- const message=error.message==='not-found'?'Nie znaleziono tej miejscowości. Sprawdź pisownię lub wpisz pełniejszy adres.':error.message==='rate-limit'?'Usługa map jest chwilowo przeciążona. Odczekaj i spróbuj ponownie.':error.message==='location-denied'?'Nie udało się uzyskać lokalizacji. Sprawdź uprawnienia albo wpisz miejscowość.':'Nie udało się pobrać danych mapy. Sprawdź połączenie i spróbuj ponownie. Nie pokazujemy przykładowych placówek.';
- $('#mapStatus').textContent=message;
+ $('#mapResults').hidden=true;
+ const reasons={
+  'not-found':'Nie znaleziono tej miejscowości. Sprawdź pisownię lub wpisz pełniejszy adres.',
+  'rate-limit':'Usługa map jest chwilowo przeciążona. Odczekaj i spróbuj ponownie.',
+  'location-denied':'Nie udało się uzyskać lokalizacji. Sprawdź uprawnienia albo wpisz miejscowość.',
+  'timeout':'Usługa map nie odpowiedziała na czas. Spróbuj ponownie za chwilę.',
+  'unavailable':'Usługa wyszukiwania jest teraz niedostępna. To nie oznacza, że w pobliżu nie ma placówek.'
+ };
+ $('#mapStatus').textContent=(reasons[error?.message]||'Nie udało się pobrać danych mapy. Sprawdź połączenie i spróbuj ponownie.')+' Nie pokazujemy przykładowych placówek.';
+}
+async function readJson(response,service){
+ if(response.status===429)throw new Error('rate-limit');
+ if(!response.ok)throw new Error(service);
+ try{return await response.json()}
+ catch(error){throw new Error(service)}
+}
+async function requestOverpass(center,signal){
+ let failure=null;
+ for(let attempt=0;attempt<PLACE_ATTEMPTS;attempt++){
+  try{
+   const response=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:new URLSearchParams({data:overpassQuery(center.lat,center.lon)}),signal});
+   if(response.status===429)throw new Error('rate-limit');
+   if(!response.ok)throw new Error('unavailable');
+   const data=await response.json();
+   if(!Array.isArray(data.elements))throw new Error('unavailable');
+   return data.elements;
+  }catch(error){
+   if(error.name==='AbortError'||error.message==='rate-limit')throw error;
+   failure=new Error('unavailable');
+   if(attempt+1<PLACE_ATTEMPTS)await new Promise(resolve=>setTimeout(resolve,700));
+  }
+ }
+ throw failure||new Error('unavailable');
+}
+function placeTimestamp(date){
+ return date.toLocaleString('pl-PL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
 }
 async function fetchPlaces(center,label,request){
- const response=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:new URLSearchParams({data:overpassQuery(center.lat,center.lon)}),signal:request.controller.signal});
- if(response.status===429)throw new Error('rate-limit');
- if(!response.ok)throw new Error('overpass');
- const data=await response.json();
- if(!Array.isArray(data.elements))throw new Error('overpass');
+ const elements=await requestOverpass(center,request.controller.signal);
  if(request.generation!==placesState.generation)return;
- placesState.center=center;placesState.zoom=13;placesState.places=parsePlaces(data.elements,center);placesState.selected=null;
- $('#searchedLocation').textContent='Wyniki do około 6 km od: '+label+'.';
+ placesState.center=center;placesState.zoom=13;placesState.places=parsePlaces(elements,center);placesState.selected=null;placesState.fetchedAt=Date.now();
+ $('#searchedLocation').textContent='Wyniki do około '+PLACE_RADIUS_KM+' km od: '+label+'.';
  $('#mapResults').hidden=false;
  $('#mapStatus').textContent='Pobrano dane OpenStreetMap. Możesz wybrać sprawę lub placówkę.';
  $('#placeTask').value='';$('#placeType').value='';$('#placeFilter').value='';
@@ -115,13 +146,12 @@ async function fetchPlaces(center,label,request){
 async function searchLocation(){
  const query=$('#placeLocation').value.trim();
  if(!query){$('#mapStatus').textContent='Wpisz miejscowość lub adres, albo użyj lokalizacji urządzenia.';$('#placeLocation').focus();return}
- const request=beginPlaceRequest(),timer=setTimeout(()=>request.controller.abort(),35000);
+ if(query.length<PLACE_QUERY_MIN){$('#mapStatus').textContent='Wpisz co najmniej '+PLACE_QUERY_MIN+' znaki miejscowości lub adresu.';$('#placeLocation').focus();return}
+ const request=beginPlaceRequest(),timer=setTimeout(()=>request.controller.abort(),PLACE_TIMEOUT);
  try{
   const params=new URLSearchParams({q:query,format:'jsonv2',limit:'1',countrycodes:'pl','accept-language':'pl'});
   const response=await fetch('https://nominatim.openstreetmap.org/search?'+params,{signal:request.controller.signal});
-  if(response.status===429)throw new Error('rate-limit');
-  if(!response.ok)throw new Error('location');
-  const data=await response.json(),first=Array.isArray(data)?data[0]:null;
+  const data=await readJson(response,'location'),first=Array.isArray(data)?data[0]:null;
   const center={lat:Number(first?.lat),lon:Number(first?.lon)};
   if(!first||!Number.isFinite(center.lat)||!Number.isFinite(center.lon)||Math.abs(center.lat)>85||Math.abs(center.lon)>180)throw new Error('not-found');
   await fetchPlaces(center,first.display_name||query,request);
@@ -130,7 +160,7 @@ async function searchLocation(){
 }
 function currentLocation(){
  if(!navigator.geolocation){$('#mapStatus').textContent='Lokalizacja nie jest dostępna. Wpisz miejscowość.';return}
- const request=beginPlaceRequest(),timer=setTimeout(()=>request.controller.abort(),35000);
+ const request=beginPlaceRequest(),timer=setTimeout(()=>request.controller.abort(),PLACE_TIMEOUT);
  navigator.geolocation.getCurrentPosition(async position=>{
   try{
    if(request.generation!==placesState.generation)return;
@@ -147,7 +177,10 @@ $('#useLocation').onclick=currentLocation;
 $('#placeLocation').addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();searchLocation()}});
 $('#placeTask').addEventListener('change',event=>{const kind=event.target.value;$('#placeType').value=kind;$('#taskHint').textContent=kind?placeKinds[kind].hint:'Wybór sprawy podpowie rodzaj placówki. Sprawdź zakres obsługi przed wizytą.';filterPlaces()});
 $('#placeType').addEventListener('change',event=>{if(event.target.value!==$('#placeTask').value){$('#placeTask').value='';$('#taskHint').textContent='Sprawdź zakres obsługi przed wizytą.'}filterPlaces()});
-$('#placeFilter').addEventListener('input',filterPlaces);
+$('#placeFilter').addEventListener('input',()=>{
+ clearTimeout(placesState.filterTimer);
+ placesState.filterTimer=setTimeout(filterPlaces,PLACE_FILTER_DELAY);
+});
 function filterPlaces(){
  const type=$('#placeType').value,query=norm($('#placeFilter').value.trim());
  placesState.visible=placesState.places.filter(place=>{
@@ -156,7 +189,7 @@ function filterPlaces(){
   return norm(place.name+' '+place.address+' '+placeKinds[place.kind].label+' '+placeKinds[place.kind].words).includes(query);
  });
  if(!placesState.visible.some(place=>place.id===placesState.selected))placesState.selected=null;
- $('#placeCount').textContent=placesState.visible.length+' miejsc'+(placesState.limitHit?' (maks. 200 najbliższych)':'');
+ $('#placeCount').textContent=placesState.visible.length+' miejsc'+(placesState.limitHit?' (maks. '+PLACE_LIMIT+' najbliższych)':'');
  renderPlaceList();if(placesState.center)drawPlaceMap();
 }
 function node(tag,text,className){const element=document.createElement(tag);if(text!==undefined)element.textContent=text;if(className)element.className=className;return element}
@@ -175,13 +208,14 @@ function placeDetails(place){
  addDetail(list,'Telefon',phone||'Brak danych w OpenStreetMap',phoneLink?'tel:'+phoneLink:null);
  const web=tags['contact:website']||tags.website,url=web&&safeWeb(web);
  addDetail(list,'Strona internetowa',web||'Brak danych w OpenStreetMap',url);
+ if(!url)addDetail(list,'Oficjalna strona placówki','Brak w danych OpenStreetMap. Wyszukaj placówkę w wyszukiwarce gov.pl',null);
  const email=tags['contact:email']||tags.email;
  if(email)addDetail(list,'E-mail',email,/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)?'mailto:'+encodeURIComponent(email):null);
  const access={yes:'Dostępna według OSM',limited:'Częściowo dostępna według OSM',no:'Niedostępna według OSM',designated:'Dostosowana według OSM'};
  addDetail(list,'Dostępność architektoniczna',access[tags.wheelchair]||'Brak danych w OpenStreetMap');
  if(tags['wheelchair:description'])addDetail(list,'Uwagi o dostępności',tags['wheelchair:description']);
  if(tags.opening_hours&&/\b(Mo|Tu|We|Th|Fr|Sa|Su)\b/.test(tags.opening_hours))list.append(node('p','Skróty dni: Mo – pon., Tu – wt., We – śr., Th – czw., Fr – pt., Sa – sob., Su – niedz.','place-detail-note'));
- details.append(list,node('p','Godziny, kontakt i dostępność mogą być nieaktualne. Potwierdź je przed wizytą.','place-detail-note'));
+ details.append(list,node('p','Dane z OpenStreetMap z '+placeTimestamp(new Date(placesState.fetchedAt||Date.now()))+'. Godziny, kontakt i dostępność są przepisane od społeczności, mogą być nieaktualne. Potwierdź je przed wizytą.','place-detail-note'));
  const actions=node('div',undefined,'place-actions'),route=node('a','Wyznacz dojazd','assist-button primary'),show=node('button','Pokaż na mapie','assist-button secondary');
  route.href='https://www.openstreetmap.org/directions?to='+encodeURIComponent(place.lat+','+place.lon);route.target='_blank';route.rel='noopener noreferrer';
  show.type='button';show.onclick=()=>{placesState.center={lat:place.lat,lon:place.lon};drawPlaceMap();mapCanvas.scrollIntoView({block:'center',behavior:'auto'});mapCanvas.focus({preventScroll:true})};
@@ -194,7 +228,11 @@ function selectPlace(id,scroll){
 }
 function renderPlaceList(){
  const list=$('#placeList');list.replaceChildren();
- if(!placesState.visible.length){list.append(node('p','Nie znaleziono pasujących miejsc w danych OpenStreetMap. Zmień filtr, spróbuj innej miejscowości lub sprawdź w urzędzie.','no-places'));return}
+ if(!placesState.visible.length){
+  const empty='Nie znaleziono pasujących miejsc w danych OpenStreetMap. Brak wyniku nie oznacza, że placówki nie ma — dane są tworzone społecznościowo. Zmień filtr, spróbuj innej miejscowości lub sprawdź wykaz placówek na gov.pl.';
+  list.append(node('p',empty,'no-places'));
+  return;
+ }
  placesState.visible.forEach((place,index)=>{
   const card=node('article',undefined,'place-card'),button=node('button',undefined,'place-summary');
   button.type='button';button.dataset.placeId=place.id;button.setAttribute('aria-expanded',String(place.id===placesState.selected));

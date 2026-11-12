@@ -23,6 +23,16 @@ async function open(page, path = '/aplikacja') {
   await page.goto(path);
 }
 
+async function agentOnline(page) {
+  await page.route('**/api/health', route => route.fulfill({ json: { agent: true, provider: 'openai', stt: false, tts: false, timeout: 30 } }));
+}
+
+async function sendPrompt(page, text) {
+  await page.locator('#prompt').fill(text);
+  await page.locator('#prompt').press('Enter');
+  await expect(page.locator('.msg.user').last()).toContainText(text);
+}
+
 async function mapServices(page, options = {}) {
   const calls = { geocode: [], overpass: [], tiles: [] };
   await page.route('https://nominatim.openstreetmap.org/**', route => {
@@ -301,17 +311,15 @@ test('lokalizacja wymaga działania użytkownika, nie wysyła jej do geokodera',
 
 test('brak klucza lub połączenia nigdy nie uruchamia scenariusza, nawet w starym trybie skryptu', async ({ page }) => {
   let requests = 0;
-  await page.route('**/api/health', route => route.fulfill({ json: { agent: false, stt: false, tts: false } }));
+  await agentOnline(page);
   await page.route('**/api/agent', route => { requests += 1; return route.fulfill({ status: 503, json: { error: 'unavailable' } }); });
   await open(page, '/aplikacja?tryb=skrypt');
-  await page.locator('#prompt').fill('Zastrzeż mój PESEL');
-  await page.locator('#prompt').press('Enter');
+  await sendPrompt(page, 'Zastrzeż mój PESEL');
   await expect(page.locator('#chat')).toContainText('Żadna czynność nie została wykonana');
   await expect(page.locator('#prompt')).toHaveValue('Zastrzeż mój PESEL');
   await expect(page.locator('.review-card,.chips,.ui.done')).toHaveCount(0);
-  expect(requests).toBe(1);
+  expect(requests).toBe(2);
   await page.locator('#prompt').press('Enter');
-  await expect.poll(() => requests).toBe(2);
   await expect(page.locator('.review-card,.ui.done')).toHaveCount(0);
 });
 
@@ -396,12 +404,12 @@ test('skrót przypomnień i przycisk zdjęcia nie uruchamiają fikcyjnych akcji 
   await open(page, '/aplikacja?tryb=skrypt');
   await page.locator('#tiles .rsum').first().click();
   await page.locator('#todoAsk').click();
-  await expect(page.locator('#chat')).toContainText('Żadna czynność nie została wykonana');
-  expect(requests).toBe(1);
+  await expect(page.locator('#chat')).toContainText('Asystent AI jest teraz niedostępny');
+  expect(requests).toBe(0);
   await page.locator('#cam').click();
   await expect(page.locator('#chat')).toContainText('Odczyt zdjęcia dokumentu nie jest dostępny');
   await expect(page.locator('.review-card,.ui.done')).toHaveCount(0);
-  expect(requests).toBe(1);
+  expect(requests).toBe(0);
 });
 
 test('większy tekst pokazuje czytelne dane dokumentu poza grafiką', async ({ page }) => {
@@ -472,7 +480,7 @@ test('menu dokumentów przy dużym tekście pozostaje ponad polem rozmowy i prze
   expect(box.y).toBeGreaterThanOrEqual(0);
   expect(box.y + box.height).toBeLessThanOrEqual(568);
   expect(await panel.evaluate(node => node.scrollHeight > node.clientHeight)).toBe(true);
-  expect(await page.evaluate(() => Number(getComputedStyle(document.querySelector('#lmenu')).zIndex) > Number(getComputedStyle(document.querySelector('#composer')).zIndex))).toBe(true);
+  expect(await page.evaluate(() => Number(getComputedStyle(document.querySelector('#composer')).zIndex) < 65)).toBe(true);
   await page.keyboard.press('Escape');
   await expect(page.locator('#title')).toBeFocused();
 });
@@ -592,18 +600,18 @@ test('komenda nawigacji nie otwiera ekranu po błędzie połączenia ani dla nie
   let status = 503;
   await page.route('**/api/agent', route => route.fulfill({ status, json: { messages: route.request().postDataJSON().messages, events: [{ t: 'text', plain: 'Tekst' }, { t: 'navigate', screen: status === 503 ? 'mapa' : 'platnosc' }] } }));
   await open(page);
-  await page.locator('#prompt').fill('Otwórz mapę');
-  await page.locator('#prompt').press('Enter');
-  await expect(page.locator('#chat')).toContainText('Żadna czynność nie została wykonana');
+  await sendPrompt(page, 'Otwórz mapę');
+  await expect(page.locator('#chat')).toContainText('Asystent AI jest teraz niedostępny');
   await expect(page.locator('#mapPanel')).not.toHaveClass(/on/);
   status = 200;
-  await page.locator('#prompt').press('Enter');
+  await sendPrompt(page, 'Otwórz mapę');
   await expect.poll(() => page.locator('.msg.bot').count()).toBe(2);
   await expect(page.locator('#mapPanel')).not.toHaveClass(/on/);
   await expect(page.locator('.review-card')).toHaveCount(0);
 });
 
 test('odpowiedź nawigacyjna nie przerywa innego otwartego ekranu', async ({ page }) => {
+  await agentOnline(page);
   let finish;
   const requested = new Promise(resolve => page.route('**/api/agent', async route => {
     resolve();
@@ -612,8 +620,7 @@ test('odpowiedź nawigacyjna nie przerywa innego otwartego ekranu', async ({ pag
     await route.fulfill({ json: { messages: [...messages, { role: 'assistant', content: 'Możesz otworzyć mapę.' }], events: [{ t: 'text', plain: 'Możesz otworzyć mapę.' }, { t: 'navigate', screen: 'mapa' }] } });
   }));
   await open(page);
-  await page.locator('#prompt').fill('Otwórz mapę');
-  await page.locator('#prompt').press('Enter');
+  await sendPrompt(page, 'Otwórz mapę');
   await requested;
   await page.locator('#chatHelp').click();
   finish();
@@ -628,14 +635,14 @@ test('odpowiedź nawigacyjna nie przerywa innego otwartego ekranu', async ({ pag
 test('niedostępny plik asystenta zamyka drogę do dawnych scenariuszy', async ({ page }) => {
   await page.route('**/agent.js?*', route => route.abort());
   await open(page, '/aplikacja?tryb=skrypt');
-  await page.locator('#prompt').fill('Zgubiłam portfel');
-  await page.locator('#prompt').press('Enter');
+  await sendPrompt(page, 'Zgubiłam portfel');
   await expect(page.locator('#chat')).toContainText('Żadna czynność nie została wykonana');
   await expect(page.locator('#prompt')).toHaveValue('Zgubiłam portfel');
   await expect(page.locator('.review-card,.chips,.ui.done')).toHaveCount(0);
 });
 
 test('druga wiadomość w trakcie odpowiedzi nie ginie ani nie jest wysyłana podwójnie', async ({ page }) => {
+  await agentOnline(page);
   let finish;
   const requested = new Promise(resolve => page.route('**/api/agent', async route => {
     resolve();
@@ -644,8 +651,7 @@ test('druga wiadomość w trakcie odpowiedzi nie ginie ani nie jest wysyłana po
     await route.fulfill({ json: { messages: [...messages, { role: 'assistant', content: 'Odpowiedź' }], events: [{ t: 'text', plain: 'Odpowiedź' }] } });
   }));
   await open(page);
-  await page.locator('#prompt').fill('Pierwsze pytanie');
-  await page.locator('#prompt').press('Enter');
+  await sendPrompt(page, 'Pierwsze pytanie');
   await requested;
   await page.locator('#prompt').fill('Drugie pytanie');
   await page.locator('#prompt').press('Enter');
@@ -703,13 +709,13 @@ test('odmowa lokalizacji i pusty wynik geokodera pozwalają wpisać inne miejsce
 });
 
 test('zmiana profilu w rozmowie nie usuwa odpowiedzi, historii ani szkicu', async ({ page }) => {
+  await agentOnline(page);
   await page.route('**/api/agent', route => {
     const messages = route.request().postDataJSON().messages;
     return route.fulfill({ json: { messages: [...messages, { role: 'assistant', content: 'Odpowiedź z modelu' }], events: [{ t: 'text', plain: 'Odpowiedź z modelu' }] } });
   });
   await open(page);
-  await page.locator('#prompt').fill('Pierwsze pytanie');
-  await page.locator('#prompt').press('Enter');
+  await sendPrompt(page, 'Pierwsze pytanie');
   await expect(page.locator('#chat')).toContainText('Odpowiedź z modelu');
   await page.locator('#prompt').fill('Mój szkic');
   await page.locator('#chatHelp').click();

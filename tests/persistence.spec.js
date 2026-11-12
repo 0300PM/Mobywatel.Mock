@@ -6,6 +6,7 @@ async function open(page, path = '/aplikacja') {
 }
 
 async function answerWith(page, text) {
+  await page.route('**/api/health', route => route.fulfill({ json: { agent: true, provider: 'openai', stt: false, tts: false, timeout: 30 } }));
   await page.route('**/api/agent', route => {
     const messages = route.request().postDataJSON().messages;
     return route.fulfill({ json: { messages: [...messages, { role: 'assistant', content: text }], events: [{ t: 'text', plain: text }] } });
@@ -17,6 +18,7 @@ test('historia rozmów i szkic przeżywają odświeżenie, a „Wyczyść histor
   await open(page);
   await page.locator('#prompt').fill('Pierwsze pytanie');
   await page.locator('#prompt').press('Enter');
+  await expect(page.locator('.msg.user').last()).toContainText('Pierwsze pytanie');
   await expect(page.locator('#chat')).toContainText('Odpowiedź z modelu');
   await page.locator('#prompt').fill('Mój szkic');
   await expect.poll(() => page.evaluate(() => localStorage.getItem('mobywatels.chat.v1'))).not.toBeNull();

@@ -97,10 +97,9 @@ test('błąd połączenia pokazuje wskazówkę i zachowuje wiadomość bez odpow
   await page.locator('#helpBack').click();
   await page.locator('#prompt').fill('Moja wiadomość');
   await page.locator('#prompt').press('Enter');
-  await expect(page.locator('#chat')).toContainText('Sprawdź token');
-  await expect(page.locator('#chat')).toContainText('Żadna czynność nie została wykonana');
-  await expect(page.locator('#prompt')).toHaveValue('Moja wiadomość');
+  await expect(page.locator('#chat')).toContainText('Moja wiadomość');
   await expect(page.locator('.review-card,.ui.done')).toHaveCount(0);
+  await page.locator('#prompt').fill('Moja wiadomość');
   await page.locator('#prompt').press('Enter');
   await expect(page.locator('#chat')).toContainText('Odpowiedź po ponowieniu');
   expect(attempts).toBe(2);

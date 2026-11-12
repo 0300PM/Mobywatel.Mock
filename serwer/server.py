@@ -78,7 +78,7 @@ NAGLOWKI_BEZPIECZENSTWA = (
     ('Cross-Origin-Opener-Policy', 'same-origin'),
     ('Strict-Transport-Security', 'max-age=31536000; includeSubDomains') if os.environ.get('HTTPS_ONLY', '').lower() in ('1', 'true', 'yes') else None,
     ('Content-Security-Policy', os.environ.get('CSP') or
-     "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: "
+     "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; img-src 'self' data: blob: "
      "https://tile.openstreetmap.org https://www.openstreetmap.org https://www.gov.pl https://meteo.imgw.pl; "
      "font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://nominatim.openstreetmap.org "
      "https://overpass-api.de https://meteo.imgw.pl; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"),

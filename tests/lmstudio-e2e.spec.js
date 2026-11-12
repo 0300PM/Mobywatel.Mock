@@ -43,7 +43,7 @@ test('przeglądarka, serwer aplikacji i serwer zgodny z LM Studio wymieniają rz
   await new Promise(resolve => lm.listen(0, '127.0.0.1', resolve));
   const lmPort = lm.address().port;
   const appPort = await freePort();
-  const app = spawn('python3', ['serwer/server.py', String(appPort)], {
+  const app = spawn(process.platform === 'win32' ? 'python' : 'python3', ['serwer/server.py', String(appPort)], {
     cwd: path.resolve(__dirname, '..'),
     env: { ...process.env, HOST: '127.0.0.1', PROVIDER: 'lmstudio', LM_STUDIO_BASE_URL: `http://127.0.0.1:${lmPort}`, LM_STUDIO_MODEL: '', MODEL: '', LM_STUDIO_API_KEY: '', MODEL_API_KEY: '', PYTHONDONTWRITEBYTECODE: '1' },
     stdio: ['ignore', 'pipe', 'pipe']

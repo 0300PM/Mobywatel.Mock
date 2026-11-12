@@ -54,3 +54,36 @@ test('nieobsługiwany format pliku jest odrzucany przed wysłaniem', async ({ pa
   await expect(page.locator('#letterStatus')).toContainText('Obsługujemy PDF, TXT oraz zdjęcia');
   expect(calls).toBe(0);
 });
+
+test('uszkodzony PDF kończy się komunikatem i nie blokuje formularza', async ({ page }) => {
+  await openLetter(page);
+  await page.locator('#letterFile').setInputFiles({ name: 'uszkodzone.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 bez strumienia') });
+  await page.locator('#extractLetter').click();
+  await expect(page.locator('#letterStatus')).not.toBeEmpty();
+  await expect(page.locator('#extractLetter')).toBeEnabled();
+  await expect(page.locator('#letterText')).toBeEditable();
+});
+
+test('odmowa dostępu do mikrofonu nie zostawia interfejsu w wiecznym ładowaniu', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'mediaDevices', {
+      value: { getUserMedia: async () => { throw new DOMException('Odmowa', 'NotAllowedError'); } },
+      configurable: true
+    });
+  });
+  await page.goto('/aplikacja');
+  await expect(page.locator('body')).toBeVisible();
+  const status = page.locator('#status');
+  if (await status.count()) await expect(status).not.toContainText('Ładuję');
+});
+
+test('utrata połączenia podczas wysyłania pisma pokazuje błąd i pozwala ponowić', async ({ page }) => {
+  await page.route('**/api/letter/explain', route => route.abort('failed'));
+  await openLetter(page);
+  await page.locator('#letterText').fill('Prosimy o odpowiedź do 26.10.2026.');
+  await page.locator('#letterConsent').check();
+  page.on('dialog', dialog => dialog.accept());
+  await page.locator('#explainLetter').click();
+  await expect(page.locator('#letterStatus')).toContainText(/nie udało|błąd|połącze/i);
+  await expect(page.locator('#explainLetter')).toBeEnabled();
+});

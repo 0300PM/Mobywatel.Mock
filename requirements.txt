@@ -1,0 +1,2 @@
+# Serwer korzysta wyłącznie z biblioteki standardowej Pythona.
+# Plik istnieje, aby audyt zależności (pip-audit) i Dependabot miały punkt zaczepienia.

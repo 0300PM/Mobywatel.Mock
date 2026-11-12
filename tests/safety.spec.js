@@ -54,6 +54,7 @@ test('bezpośrednie zagrożenie pokazuje 112 i nigdy nie wysyła opisu do AI', a
 
 test('AI dostaje lokalizację wyłącznie po zgodzie; zdjęcie pozostaje lokalnym podglądem', async ({ page }) => {
   const payloads = [];
+  page.on('dialog', dialog => dialog.accept());
   await page.route('**/api/safety/assist', async route => {
     payloads.push(route.request().postDataJSON());
     await route.fulfill({ json: { result: { actions: ['Sprawdź oficjalny komunikat.'], checklist: ['Zapisz numer służb.'], avoid: ['Nie wchodź do wody.'], call_emergency: false } } });
@@ -91,7 +92,7 @@ test('profil i plecak są opcjonalne, lokalne i zachowane po ponownym otwarciu',
   await page.locator('#openSafety').click();
   await expect(page.locator(`[data-pack-id="${firstLabel}"]`)).toBeChecked();
   await expect(page.locator('[name="safety-pets"]')).toBeChecked();
-  await expect(page.locator('#safetyPackList')).toContainText('zwierzę');
+  await expect(page.locator('#safetyPackSuggestion')).toContainText('dla zwierząt');
   await page.locator('#safetyClearProfile').click();
   await expect(page.locator('[name="safety-pets"]')).not.toBeChecked();
 });

@@ -139,6 +139,45 @@ def extract_pdf_text(data):
     return re.sub(r"[ \t]+", " ", " ".join(pieces)).strip()
 
 
+OCR_LANG = os.environ.get("OCR_LANG", "pol")
+
+
+def letter_kind(filename, declared):
+    name = filename.lower()
+    if name.endswith(".txt"):
+        return "txt"
+    if name.endswith(".pdf"):
+        return "pdf"
+    if name.endswith((".jpg", ".jpeg", ".png", ".webp")) or (isinstance(declared, str) and declared.startswith("image/")):
+        return "image"
+    return ""
+
+
+def ocr_text(data):
+    """Tekst ze zdjęcia albo skanu PDF. Brak Tesseracta oznacza czytelny komunikat, nie pusty wynik."""
+    try:
+        import pytesseract
+        from PIL import Image, ImageOps
+        pytesseract.get_tesseract_version()
+    except Exception:
+        raise ValueError("Odczyt zdjęć i skanów (OCR) nie jest włączony na tym serwerze. Zainstaluj Tesseract OCR albo wpisz tekst ręcznie.")
+    try:
+        import io
+        image = Image.open(io.BytesIO(data))
+        if getattr(image, "n_frames", 1) > 1:
+            image.seek(0)
+        image = ImageOps.exif_transpose(image).convert("L")
+        if max(image.size) < 1000:
+            image = image.resize((image.width * 2, image.height * 2), Image.LANCZOS)
+        text = pytesseract.image_to_string(image, lang=OCR_LANG)
+    except Exception:
+        raise ValueError("Nie udało się rozpoznać tekstu z pliku. Spróbuj wyraźniejszego zdjęcia albo wpisz tekst ręcznie.")
+    text = re.sub(r"[ \t]+", " ", text).strip()
+    if not text:
+        raise ValueError("Nie rozpoznaliśmy tekstu na tym pliku. Spróbuj ostrzejszego zdjęcia albo wpisz tekst ręcznie.")
+    return text
+
+
 def letter_text(req):
     if not isinstance(req, dict):
         raise ValueError("Nieprawidłowe żądanie.")
@@ -153,25 +192,28 @@ def letter_text(req):
     payload = req.get("data")
     if not isinstance(filename, str) or not isinstance(payload, str) or len(payload) > 6 * 1024 * 1024:
         raise ValueError("Wybierz plik TXT lub PDF o wielkości do 4 MiB.")
-    if not filename.lower().endswith((".txt", ".pdf")):
-        raise ValueError("Obsługiwane są pliki TXT i PDF z warstwą tekstową. Skan wymaga OCR i nie jest obsługiwany.")
+    kind = letter_kind(filename, req.get("type"))
+    if kind not in ("txt", "pdf", "image"):
+        raise ValueError("Obsługiwane są pliki TXT, PDF oraz zdjęcia JPG, PNG i WEBP.")
     try:
         data = base64.b64decode(payload, validate=True)
     except (ValueError, base64.binascii.Error):
         raise ValueError("Nie udało się odczytać pliku.")
     if not data or len(data) > MAX_LETTER_BYTES:
         raise OverflowError("Plik jest pusty albo przekracza limit 4 MiB.")
-    if filename.lower().endswith(".txt"):
+    if kind == "txt":
         try:
             text = data.decode("utf-8-sig")
         except UnicodeDecodeError:
             raise ValueError("Plik TXT musi być zapisany w kodowaniu UTF-8.")
-    else:
+    elif kind == "pdf":
         if not data.startswith(b"%PDF-"):
             raise ValueError("Plik nie wygląda na dokument PDF.")
-        text = extract_pdf_text(data)
+        text = extract_pdf_text(data) or ocr_text(data)
         if not text:
-            raise ValueError("Nie udało się odczytać tekstu PDF. Plik może być skanem; OCR nie jest dostępny.")
+            raise ValueError("Nie udało się odczytać PDF. To skan bez tekstu, a OCR jest niedostępny na tym serwerze.")
+    else:
+        text = ocr_text(data)
     if len(text) > MAX_LETTER_TEXT:
         raise OverflowError("Odczytany tekst przekracza limit 30 000 znaków.")
     return text.strip()

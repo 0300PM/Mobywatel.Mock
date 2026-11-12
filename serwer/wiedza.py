@@ -71,6 +71,12 @@ def _wczytaj():
         _idx = dict(karty=karty, frag=frag, df=df, avg=dl / max(len(frag), 1), N=len(frag), post=post, tyt=tyt)
         return _idx
 
+def najnowsza_aktualizacja():
+    """Najświeższa data aktualizacji w lokalnej kopii kart (YYYY-MM-DD); '' gdy brak danych."""
+    I = _wczytaj()
+    daty = [k.get('ostatnia_aktualizacja') for k in I['karty'].values()]
+    return max((d[:10] for d in daty if isinstance(d, str) and d), default='')
+
 def szukaj(zapytanie, n=4, wariantow=3, znakow=1500):
     """Zwraca n usług (grupowanych po adresie karty): nazwa, url, data aktualizacji, instytucja i warianty z kluczowymi sekcjami."""
     I = _wczytaj()

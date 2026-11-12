@@ -63,7 +63,7 @@ test('tłumacz pisma pokazuje cytowane fakty i nie wymyśla terminu, a panel dzi
   await page.locator('.module-services summary').click();
   await page.locator('#openLetterModule').click();
   await expect(page.locator('#letterBack')).toBeFocused();
-  await expect(page.locator('#letterPanel')).toContainText('Skanów i zdjęć nie obsługujemy');
+  await expect(page.locator('#letterPanel')).toContainText('rozpoznajemy automatycznie (OCR)');
   await page.locator('#letterText').fill('Prosimy o złożenie wyjaśnień. Prosimy dołączyć kopię faktury.');
   await page.locator('#letterConsent').check();
   await page.locator('#explainLetter').click();
@@ -278,7 +278,7 @@ test('błędy usług mapy nie pokazują fikcyjnych ani nieaktualnych wyników', 
   await searchMap(page);
   await expect(page.locator('#placeList')).toContainText('Apteka Testowa');
   await page.locator('#searchLocation').click();
-  await expect(page.locator('#mapStatus')).toContainText('Nie udało się pobrać danych mapy');
+  await expect(page.locator('#mapStatus')).toContainText('Usługa wyszukiwania jest teraz niedostępna');
   await expect(page.locator('#mapResults')).toBeHidden();
   await expect(page.locator('#mapStatus')).toContainText('Nie pokazujemy przykładowych placówek');
   await expect(page.locator('#searchLocation')).toBeEnabled();
@@ -679,6 +679,7 @@ test('niekompletne współrzędne nie tworzą fałszywych punktów na mapie', as
   await expect(page.locator('#placeCount')).toHaveText('0 miejsc');
   await expect(page.locator('.map-marker')).toHaveCount(0);
   await expect(page.locator('#placeList')).toContainText('Nie znaleziono pasujących miejsc');
+  await expect(page.locator('#placeList')).toContainText('Brak wyniku nie oznacza, że placówki nie ma');
 });
 
 test('odmowa lokalizacji i pusty wynik geokodera pozwalają wpisać inne miejsce', async ({ page, context }) => {

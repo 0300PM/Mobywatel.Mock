@@ -128,7 +128,7 @@ Ograniczenia workera: Workers AI nie obsługuje `tool_calls`, więc odpowiedzi s
 | Ustawienia seniora i dostępności | `localStorage` | Do wyczyszczenia danych przeglądarki; przy błędzie aplikacja działa w bieżącej sesji i ostrzega. |
 | Wybór modelu (LM Studio lub worker) | `localStorage`, przypisany do identyfikatora serwera lub workera (`lmstudio.server_id`) | Nie przenosi się na inny serwer; wybór może działać tylko do końca sesji przy niedostępnej pamięci. |
 | Lista osób i zadania rodzinne | `localStorage` | Lokalnie w jednej przeglądarce, bez synchronizacji. |
-| Historia i szkic rozmowy | stan strony w pamięci | Nie przetrwa odświeżenia. |
+| Historia i szkic rozmowy | `localStorage`, klucz `mobywatels.chat.v1` z polem `v` (wersja schematu) | Do wyczyszczenia danych przeglądarki albo „Wyczyść historię”; przy błędzie zapisu aplikacja ostrzega. |
 | Znak, skan i skrzynka transferu | pamięć procesu Pythona | Ulotne, wygaszane; znikają po restarcie serwera. |
 | Logi i cache TTS | plik `serwer/agent.log` oraz pamięć procesu | Cache TTS ulotny; log może pozostać na dysku do ręcznego usunięcia. |
 

@@ -20,15 +20,17 @@ Karta lub alternatywny układ może otworzyć dodatkowe szczegóły, menu osoby/
 
 `agent.js` wysyła wiadomości do `/api/agent` i wyświetla tekst, błędy lub ograniczoną nawigację. Gdy serwer nie ma dostawcy lub połączenie nie powiedzie się, UI informuje o błędzie i zachowuje wiadomość do ponowienia; nie odtwarza gotowego, fikcyjnego scenariusza zamiast modelu.
 
+Stan modelu jest widoczny nad polem wiadomości (`#agentStatus` w `aria-live`, przycisk `#retryAgent` sprawdzający `/api/health` ponownie). Gdy modelu nie ma, asystent nie blokuje aplikacji: wiadomość nie jest wysyłana, użytkownik widzi listę gotowych scenariuszy (`staticScenarios()` w `core.js`) i nadal korzysta z dokumentów, mapy, tłumacza pism, poradników bezpieczeństwa i ustawień dostępności. Ponawianie jest ograniczone do jednej dodatkowej próby (`AGENT_ATTEMPTS`), wyłącznie dla odpowiedzi 5xx/429 i z komunikatem w `aria-live`; treść wiadomości nie jest przy tym powtarzana po stronie modelu.
+
 Dla `PROVIDER=lmstudio` i `PROVIDER=workers` frontend ustawia dłuższy limit żądania (`AGENT_INFO.timeout + 20 s`, maks. 600 s) i dołącza wybrany model z karty modelu. Dla `PROVIDER=workers` karta pokazuje modele workera (`/api/lmstudio/models` pyta wtedy Cloudflare), a komunikaty błędu mówią o workerze, nie o LM Studio. W tym trybie odpowiedzi są wyłącznie tekstem — Workers AI nie zwraca wywołań narzędzi, więc karty i nawigacja się nie pojawiają.
 
-Historia i szkice są stanem strony. Wstecz pozwala wrócić do szkicu. Dla kolejnych wiadomości frontend pilnuje stanu żądania, aby uniknąć utraty lub podwójnego wysłania.
+Historia rozmów i szkic są zapisywane lokalnie pod kluczem `mobywatels.chat.v1` z polem wersji schematu. Zapis obejmuje tytuł, ikonę, czas, teksty wiadomości i kontekst modelu; karty potwierdzeń, nagrywanie i stan otwartych ekranów nie są zapisywane, więc po odświeżeniu rozmowa wraca jako tekst, bez fikcyjnych przycisków akcji. „Wyczyść historię” usuwa klucz i odtwarza pustą rozmowę, a niepowodzenie zapisu jest komunikowane w `aria-live` zamiast udawania trwałości. Wstecz pozwala wrócić do szkicu. Dla kolejnych wiadomości frontend pilnuje stanu żądania, aby uniknąć utraty lub podwójnego wysłania.
 
 ### Pomoc, dostępność i profil seniora
 
 Pomoc zawiera przewodniki bezpieczeństwa, słowniczek, edytowalny szkic dyktowania, przykładowe przypomnienia oraz wybór czytnika głosowego. Profil seniora i ustawienia dostępności są osobno zapamiętywane dla profilu standardowego i seniora. Dostępne ustawienia obejmują rozmiar tekstu, kontrast, uproszczone menu, ograniczenie animacji i widoczność przycisków odczytu. Ustawienie animacji współdziała z systemowym `prefers-reduced-motion`.
 
-Wypowiedź rozpoznana z mikrofonu pozostaje szkicem: użytkownik może poprawić tekst i świadomie zdecydować o wysłaniu. Brak obsługi przeglądarki, zgody na mikrofon lub dostawcy serwera nie powinien blokować wpisywania tekstu.
+Wypowiedź rozpoznana z mikrofonu pozostaje szkicem: użytkownik może poprawić tekst i świadomie zdecydować o wysłaniu. Brak obsługi przeglądarki, zgody na mikrofon lub dostawcy serwera nie powinien blokować wpisywania tekstu. Dyktowanie rozróżnia brak zgody, brak urządzenia, zajęty mikrofon, brak HTTPS (`isSecureContext`) i błąd rozpoznawania (`microphoneError()`), pokazuje stan w `#dictationStatus` i zatrzymuje nagranie po `DICTATION_MAX_MS`, odrzucając plik większy niż `DICTATION_MAX_BYTES`. Rozpoznawanie ponawiane jest najwyżej raz (`DICTATION_MAX_TRIES`) i tylko po błędzie serwera.
 
 ### Mapa placówek
 
@@ -45,7 +47,7 @@ Kategorie obejmują m.in. urzędy gminne, powiatowe, skarbowe, ZUS, punkty paszp
 
 ### Tłumacz pism urzędowych
 
-`modules.js` obsługuje wejście TXT UTF-8, PDF z warstwą tekstową do 4 MiB i tekst wpisany ręcznie. Odczyt pliku jest osobną akcją od analizy AI. OCR nie działa. Wysłanie tekstu do modelu wymaga edytowalnego podglądu i osobnego pola zgody.
+`modules.js` obsługuje wejście TXT UTF-8, PDF (także skan) i zdjęcia JPG, PNG, WEBP do 4 MiB oraz tekst wpisany ręcznie. Odczyt pliku jest osobną akcją od analizy AI. Skan i zdjęcie rozpoznaje OCR serwera; gdy OCR jest wyłączony, użytkownik widzi komunikat i może wpisać tekst ręcznie. Po odczycie `letterQuality()` ocenia udział liter i znaków zastępczych i pokazuje ostrzeżenie o niskiej jakości, a tekst zawsze zostaje w edytowalnym polu do korekty. Wysłanie tekstu do modelu wymaga edytowalnego podglądu i osobnego pola zgody.
 
 Wynik modelu jest prezentowany jako znaczenie, kroki, termin i dokumenty, wraz z cytatami. Serwer odrzuca cytat, którego nie ma w źródle, oraz termin bez pasującej daty/okresu. To walidacja spójności tekstowej, nie niezależna kontrola prawna. Tekst może opuścić urządzenie i podlegać zasadom skonfigurowanego dostawcy.
 

@@ -5,6 +5,8 @@ Interfejsu nie tłumaczymy maszynowo: tekst bez tłumaczenia zostaje po polsku i
 import json, os, re, threading, time, urllib.request, sys
 from concurrent.futures import ThreadPoolExecutor
 
+import ustawienia
+
 # kod: (nazwa po angielsku dla modelu, nazwa własna do wyboru, kod mowy dla STT lub None)
 JEZYKI = {
     'pl': ('Polish', 'Polski', 'pl'), 'en': ('English', 'English', 'en'), 'de': ('German', 'Deutsch', 'de'), 'fr': ('French', 'Français', 'fr'),
@@ -107,13 +109,19 @@ def _json_call(instr, teksty, key, tokens=4000):
                 reasoning={'effort': 'low'}, text={'format': {'type': 'json_schema', 'name': 'tlumaczenia', 'strict': True,
                     'schema': {'type': 'object', 'properties': {'t': {'type': 'array', 'items': {'type': 'string'}}}, 'required': ['t'], 'additionalProperties': False}}})
     if agent.OPENAI_TIER: body['service_tier'] = agent.OPENAI_TIER
+    try:
+        ustawienia.budzet_sprawdz()
+    except ustawienia.BudzetWyczerpany:
+        return None
     for proba in range(3):
         req = urllib.request.Request('https://api.openai.com/v1/responses', data=json.dumps(body).encode(), headers={'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json'})
         try:
-            with urllib.request.urlopen(req, timeout=60) as r: out = json.loads(r.read())
+            with urllib.request.urlopen(req, timeout=ustawienia.CZAS_TLUMACZENIA) as r: out = json.loads(r.read())
             txt = ''.join(p.get('text', '') for it in out.get('output', []) if it.get('type') == 'message' for p in it.get('content', []) if p.get('type') in ('output_text', 'text'))
             res = json.loads(txt)['t']
-            if len(res) == len(teksty): return res
+            if len(res) == len(teksty):
+                ustawienia.budzet_licz()
+                return res
         except urllib.error.HTTPError as e:
             msg = e.read().decode('utf-8', 'replace')
             if e.code == 400 and 'service_tier' in msg and 'service_tier' in body: body.pop('service_tier', None); continue

@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'serwer'))
 
 import agent
 import server
+import ustawienia
 
 
 class FakeWorker(BaseHTTPRequestHandler):
@@ -80,8 +81,8 @@ class WorkersTest(unittest.TestCase):
             patch.object(agent, 'WORKERS_TOKEN', ''),
             patch.object(agent, 'WORKERS_MODEL', '@cf/meta/llama-3.3-70b-instruct-fp8-fast'),
             patch.object(agent, 'WORKERS_TIMEOUT', 5),
-            patch.object(server, 'zablokowane', return_value=False),
-            patch.object(server, 'log'),
+            patch.object(ustawienia, 'zablokowane', return_value=False),
+            patch.object(ustawienia, 'log'),
             patch.dict(os.environ, {'OPENAI_API_KEY': ''}),
         ]
         for item in patches:

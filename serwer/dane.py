@@ -575,6 +575,7 @@ def r_karta_uslugi(a, s):
     for k in w:
         out.append(dict(usluga=k['usluga'], url=k['url'], aktualizacja=k['aktualizacja'], instytucja=k['instytucja'],
                         warianty=[dict(wariant=v['wariant'], sekcje={x['sekcja']: re.sub(r'\[([^\]]*)\]\([^)]*\)', r'\1', x['tresc']).replace('**', '') for x in v['sekcje']}) for v in k['warianty']]))
-    return dict(znaleziono=True, karty=out, uwaga='Lokalna kopia może być nieaktualna. Aktualne warunki sprawdź w urzędzie lub na gov.pl.'), None
+    return dict(znaleziono=True, karty=out, kopia_na_dzien=wiedza.najnowsza_aktualizacja(),
+                uwaga='To lokalna kopia kart gov.pl, nie potwierdzenie urzędu. Daty i opłaty są orientacyjne, mogą się zmienić. Aktualne warunki sprawdź w urzędzie lub na gov.pl.'), None
 
 READ = {k[2:]: v for k, v in list(globals().items()) if k.startswith('r_')}

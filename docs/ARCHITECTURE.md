@@ -11,13 +11,13 @@ Przeglądarka
   ├─ mockup/index.html + skrypty i style
   ├─ Web APIs: DOM, fetch, localStorage, geolokalizacja, audio
   ├─ usługi mapowe: Nominatim, Overpass i kafelki OpenStreetMap
-  └─ /api/* → serwer/server.py
+  └─ /api/* → serwer/server.py → serwer/api.py
                  ├─ logika rozmowy i nawigacji → serwer/agent.py
                  ├─ dostawca modelu → OpenAI / Anthropic / zgodne API / LM Studio / Cloudflare Workers AI
                  ├─ worker Cloudflare → cloudflare-worker/src/index.js → Workers AI (api.cloudflare.com)
                  ├─ mowa → OpenAI lub ElevenLabs
                  ├─ tłumaczenia interfejsu → serwer/tlumacz.py i słowniki JSON
-                 ├─ wyjaśnianie pism → walidacja cytatów w serwer/server.py
+                 ├─ wyjaśnianie pism → walidacja cytatów w serwer/api.py
                  ├─ bezpieczeństwo → serwer/safety.py + lokalne źródła w mockup/safety-guides.json
                  └─ transfer demonstracyjny → pamięć procesu serwera
 ```
@@ -135,3 +135,22 @@ Ograniczenia workera: Workers AI nie obsługuje `tool_calls`, więc odpowiedzi s
 ## Ważne granice
 
 Nie ma trwałej bazy, kont, uprawnień serwerowych, uwierzytelnienia odbiorcy, podpisu, sprawdzenia rejestru ani wysyłania formularza do urzędu. Użytkownik nie powinien wprowadzać prawdziwych danych. Zmiana prototypu w produkcyjny system wymagałaby osobnej architektury tożsamości, zgód, autoryzacji, retencji, audytu, dostępności i ochrony danych.
+
+## Granice odpowiedzialności serwera
+
+`serwer/server.py` to już tylko transport: gniazdo HTTP, pliki statyczne z `mockup/`, normalizacja ścieżek językowych, proxy LM Studio i adapter WSGI dla Vercela. Każdą odpowiedzialność API trzyma osobny moduł:
+
+| Moduł | Odpowiedzialność |
+| --- | --- |
+| `serwer/api.py` | router i walidacja żądań, rozmowa z modelem, pisma (OCR, PDF, cytaty), bezpieczeństwo kryzysowe, zdrowie usług, słowniki i18n, tłumaczenie |
+| `serwer/mowa.py` | rozpoznawanie i synteza mowy (ElevenLabs, potem OpenAI), pamięć podręczna głosu |
+| `serwer/znak.py` | znak mObywatela: żetony, skrzynki i przekazywanie danych między urządzeniami |
+| `serwer/ustawienia.py` | wspólna warstwa: ścieżki, klucze dostawców, dziennik, blokada dostępu do modelu |
+| `serwer/agent.py`, `serwer/lmstudio.py`, `serwer/tlumacz.py`, `serwer/safety.py` | dostawcy modelu, klient HTTP LM Studio, słowniki, poradniki kryzysowe |
+
+Reguły utrzymania tych granic:
+
+- router przyjmuje ścieżkę, treść żądania i nagłówki, a zwraca gotowy obiekt JSON albo `ApiError` z kodem HTTP; nie zna gniazda ani plików statycznych,
+- moduły domenowe nie importują `server.py`, więc dają się testować bez uruchamiania serwera,
+- klucze dostawców, dziennik i blokada mają jedno miejsce (`serwer/ustawienia.py`), dzięki czemu podmiana w testach działa w całym API,
+- nowy endpoint to funkcja w module domenowym i jedna gałąź w `api.get`/`api.post`, bez zmian w transporcie.

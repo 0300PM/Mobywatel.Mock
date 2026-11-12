@@ -26,6 +26,19 @@ npm run build:css
 npm run watch:css
 ```
 
+## CI przed wdrożeniem
+
+`.github/workflows/test.yml` uruchamia przy każdym pushu i pull requeście:
+
+1. `python -m unittest discover -s tests -p "test_*.py" -v` — 63 testy backendu;
+2. `npx playwright test` — testy przeglądarkowe z Chromium;
+3. publikację `playwright-report/` i `test-results/` jako artefaktu (retencja 30 dni).
+
+Raport testów zostaje w artefakcie CI i może być materiałem konkursowym. Wdrożenie powinno być blokowane,
+dopóki oba joby nie są zielone.
+
+Pomiary wydajności i sposób ich powtórzenia: `docs/PERFORMANCE.md`.
+
 ## Konfiguracja Playwright
 
 `playwright.config.js`:
@@ -36,6 +49,24 @@ npm run watch:css
 - nie testuje automatycznie produkcyjnych kluczy ani prawdziwych usług.
 
 Nie uruchamiaj równolegle innego procesu na porcie 8792. Przy CI można ustawić `CI`, aby Playwright nie używał już działającego serwera.
+
+## Pokrycie planu naprawczego
+
+| Etap | Wymaganie | Gdzie |
+|---|---|---|
+| 2 | ścieżki nawigacji | `features.spec.js` — profil, menu, ustawienia, powrót z fokusem |
+| 2 | walidacja formularzy | `prototype.spec.js` — zadania rodzinne, przypomnienia |
+| 2 | błędy AI i brak konfiguracji | `lmstudio.spec.js`, `prototype.spec.js` |
+| 2 | puste i błędne odpowiedzi OSM | `map-data.spec.js` — 429, błędny JSON, puste wyniki |
+| 2 | odświeżenie strony | `persistence.spec.js` |
+| 2 | utrata połączenia | `letter-ocr.spec.js` — przerwane żądanie pisma |
+| 2 | odmowa mikrofonu | `letter-ocr.spec.js`, `prototype.spec.js` |
+| 2 | uszkodzony PDF | `letter-ocr.spec.js` |
+| 2 | szkic rozmowy lokalnie | `persistence.spec.js` |
+| 2 | oznaczenie funkcji demo | `prototype.spec.js`, treść `index.html` |
+| 3 | pomiary wydajności | `docs/PERFORMANCE.md` |
+| 4 | WCAG i 320 px | `features.spec.js`, `prototype.spec.js` (axe) |
+| 5 | CI: testy, audyt | `.github/workflows/test.yml` |
 
 ## Zestawy testowe
 

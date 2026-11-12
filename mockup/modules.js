@@ -34,7 +34,12 @@ $('#familyBack').addEventListener('click',closeFamily);
 
 function setLetterStatus(text){$('#letterStatus').textContent=text}
 async function postJson(url,payload,signal){
- const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal});
+ let response;
+ try{response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal})}
+ catch(error){
+  if(error.name==='AbortError')throw error;
+  throw new Error('Nie udało się połączyć z serwerem. Sprawdź połączenie i spróbuj ponownie.');
+ }
  const data=await response.json().catch(()=>({}));
  if(!response.ok)throw new Error(typeof data.error==='string'?data.error:'Nie udało się wykonać tej czynności.');
  return data;
@@ -136,6 +141,8 @@ async function explainLetter(){
  if(!text){setLetterStatus('Wklej treść albo najpierw odczytaj plik.');$('#letterText').focus();return}
  if(text.length>30000){setLetterStatus('Tekst przekracza limit 30 000 znaków.');return}
  if(!$('#letterConsent').checked){setLetterStatus('Zaznacz zgodę po sprawdzeniu i ewentualnym usunięciu danych osobowych.');$('#letterConsent').focus();return}
+ const zgoda=window.confirm('Wysyłasz do modelu AI ('+(window.AGENT_INFO?.provider||'skonfigurowany dostawca')+') tekst pisma:\n\n'+text.slice(0,280)+(text.length>280?'…':'')+'\n\nCel: wyjaśnienie pisma prostym językiem. Sprawdź, czy nie ma w nim danych osobowych. Obowiązują zasady dostawcy modelu.');
+ if(!zgoda){setLetterStatus('Anulowano. Nic nie wysłano do modelu AI.');return}
  const button=$('#explainLetter');button.disabled=true;$('#extractLetter').disabled=true;
  letterRequest=new AbortController();
  setLetterStatus('Wysyłam tekst do skonfigurowanego modelu AI. Odpowiedź może chwilę potrwać.');

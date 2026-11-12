@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'serwer'))
 
 import safety
 import server
+import ustawienia
 
 
 class SafetyModuleValidationTest(unittest.TestCase):
@@ -109,7 +110,7 @@ class SafetyApiTest(unittest.TestCase):
     def test_endpoint_calls_configured_model_and_returns_validated_answer(self):
         answer = {'actions': ['Sprawdź oficjalne komunikaty.'], 'checklist': ['Zapisz numer służb.'], 'avoid': ['Nie wchodź do wody.'], 'call_emergency': False}
         completion = ([], None, [{'t': 'text', 'plain': json.dumps(answer)}], None)
-        with patch.object(server, 'zablokowane', return_value=False), patch.object(server, 'k', return_value='test-key'), patch.object(server.agent, 'live_chat', return_value=completion) as live:
+        with patch.object(ustawienia, 'zablokowane', return_value=False), patch.object(ustawienia, 'k', return_value='test-key'), patch.object(server.agent, 'live_chat', return_value=completion) as live:
             status, data = self.post(self.payload())
         self.assertEqual(status, 200)
         self.assertEqual(data['result'], answer)
@@ -121,8 +122,8 @@ class SafetyApiTest(unittest.TestCase):
         completion = ([], None, [{'t': 'text', 'plain': json.dumps(answer)}], None)
         with (
             patch.object(server.agent, 'PROVIDER', 'anthropic'),
-            patch.object(server, 'zablokowane', return_value=False),
-            patch.object(server, 'k', side_effect=lambda name: 'test-key' if name == 'anthropic' else self.fail('Unexpected key lookup: ' + name)) as key,
+            patch.object(ustawienia, 'zablokowane', return_value=False),
+            patch.object(ustawienia, 'k', side_effect=lambda name: 'test-key' if name == 'anthropic' else self.fail('Unexpected key lookup: ' + name)) as key,
             patch.object(server.agent, 'live_chat', return_value=completion),
         ):
             status, data = self.post(self.payload())
@@ -131,7 +132,7 @@ class SafetyApiTest(unittest.TestCase):
         key.assert_called_once_with('anthropic')
 
     def test_emergency_request_is_rejected_without_calling_model(self):
-        with patch.object(server, 'k') as key, patch.object(server.agent, 'live_chat') as live:
+        with patch.object(ustawienia, 'k') as key, patch.object(server.agent, 'live_chat') as live:
             try:
                 self.post(self.payload(immediateDanger=True))
             except Exception as error:
@@ -144,7 +145,7 @@ class SafetyApiTest(unittest.TestCase):
         live.assert_not_called()
 
     def test_provider_failure_returns_no_fabricated_answer(self):
-        with patch.object(server, 'zablokowane', return_value=False), patch.object(server, 'k', return_value=None):
+        with patch.object(ustawienia, 'zablokowane', return_value=False), patch.object(ustawienia, 'k', return_value=None):
             try:
                 self.post(self.payload())
             except Exception as error:

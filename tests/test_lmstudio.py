@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'serwer'))
 import agent
 import lmstudio
 import server
+import ustawienia
 
 
 class FakeLMStudio(BaseHTTPRequestHandler):
@@ -128,8 +129,8 @@ class LMStudioTest(unittest.TestCase):
             patch.object(agent, 'LM_STUDIO_BASE_URL', self.lm_url),
             patch.object(agent, 'LM_STUDIO_MODEL', ''),
             patch.object(agent, 'LM_STUDIO_TIMEOUT', 5),
-            patch.object(server, 'zablokowane', return_value=False),
-            patch.object(server, 'log'),
+            patch.object(server.ustawienia_mod, 'zablokowane', return_value=False),
+            patch.object(server.ustawienia_mod, 'log'),
             patch.dict(os.environ, {'LM_STUDIO_API_KEY': '', 'MODEL_API_KEY': '', 'LM_STUDIO_OPENAI_PROXY': ''}),
         ]
         for item in patches:
@@ -246,8 +247,8 @@ class LMStudioTest(unittest.TestCase):
             self.assertEqual(result['code'], 'auth')
             self.assertNotIn('wrong-secret', json.dumps(result))
             self.assertNotIn('server-secret-detail', json.dumps(result))
-            self.assertNotIn('wrong-secret', str(server.log.call_args_list))
-            self.assertNotIn('server-secret-detail', str(server.log.call_args_list))
+            self.assertNotIn('wrong-secret', str(server.ustawienia_mod.log.call_args_list))
+            self.assertNotIn('server-secret-detail', str(server.ustawienia_mod.log.call_args_list))
             self.assertNotIn('events', result)
         with patch.object(agent, 'LM_STUDIO_BASE_URL', 'http://127.0.0.1:1'):
             status, result = self.chat('model/one')
@@ -261,7 +262,7 @@ class LMStudioTest(unittest.TestCase):
         self.assertEqual(status, 502)
         self.assertEqual(result['code'], 'response')
         self.assertNotIn('private-provider-detail', json.dumps(result))
-        self.assertNotIn('private-provider-detail', str(server.log.call_args_list))
+        self.assertNotIn('private-provider-detail', str(server.ustawienia_mod.log.call_args_list))
 
     def test_timeout_and_blocked_access_do_not_retry(self):
         with patch.object(lmstudio, 'open_request', side_effect=TimeoutError('timeout')) as call:
@@ -269,7 +270,7 @@ class LMStudioTest(unittest.TestCase):
         self.assertEqual(status, 502)
         self.assertEqual(result['code'], 'timeout')
         self.assertEqual(call.call_count, 1)
-        with patch.object(server, 'zablokowane', return_value=True):
+        with patch.object(server.ustawienia_mod, 'zablokowane', return_value=True):
             status, _ = self.chat('model/one')
             list_status, _ = self.request('/api/lmstudio/models')
         self.assertEqual(status, 503)
@@ -311,25 +312,27 @@ class LMStudioTest(unittest.TestCase):
     def test_openai_proxy_forwards_all_requested_endpoints_with_server_token(self):
         self.lm.settings['token'] = 'server-token'
         with patch.dict(os.environ, {'LM_STUDIO_API_KEY': 'server-token', 'LM_STUDIO_OPENAI_PROXY': '1'}):
-            status, models = self.request('/v1/models', headers={'Authorization': 'Bearer untrusted-client'})
+            status, _ = self.request('/v1/models', headers={'Authorization': 'Bearer untrusted-client'})
+            self.assertEqual(status, 401)
+            status, models = self.request('/v1/models', headers={'Authorization': 'Bearer server-token'})
             self.assertEqual(status, 200)
             self.assertEqual(models['data'][0]['id'], 'model/one')
             for endpoint in ('/v1/responses', '/v1/chat/completions', '/v1/completions', '/v1/embeddings'):
                 with self.subTest(endpoint=endpoint):
                     payload = {'model': 'model/one', 'input': 'tekst', 'messages': [{'role': 'user', 'content': 'tekst'}]}
-                    status, result = self.request(endpoint, payload, {'Authorization': 'Bearer untrusted-client'})
+                    status, result = self.request(endpoint, payload, {'Authorization': 'Bearer server-token'})
                     self.assertEqual(status, 200)
                     self.assertEqual(self.lm.calls[-1]['path'], endpoint)
                     self.assertEqual(json.loads(self.lm.calls[-1]['data']), payload)
                     self.assertEqual(self.lm.calls[-1]['headers']['Authorization'], 'Bearer server-token')
                     self.assertNotIn('server-token', json.dumps(result))
-            status, result = self.request('/v1/not-allowed', {})
+            status, result = self.request('/v1/not-allowed', {}, {'Authorization': 'Bearer server-token'})
             self.assertEqual(status, 404)
 
     def test_openai_proxy_preserves_upstream_errors_and_blocks_redirects(self):
         with patch.dict(os.environ, {'LM_STUDIO_OPENAI_PROXY': '1', 'LM_STUDIO_API_KEY': 'private'}):
             self.lm.settings['status'] = 422
-            status, result = self.request('/v1/embeddings', {'input': 'tekst'})
+            status, result = self.request('/v1/embeddings', {'input': 'tekst'}, {'Authorization': 'Bearer private'})
             self.assertEqual(status, 422)
             self.assertEqual(result['error'], 'upstream error')
             self.lm.settings.pop('status')
@@ -337,15 +340,15 @@ class LMStudioTest(unittest.TestCase):
             status, result = self.request('/api/lmstudio/models')
             self.assertEqual(status, 502)
             self.assertFalse(any(call['path'] == '/v1/redirect-target' for call in self.lm.calls))
-            status, result = self.request('/v1/models')
+            status, result = self.request('/v1/models', headers={'Authorization': 'Bearer private'})
             self.assertEqual(status, 502)
             self.assertFalse(any(call['path'] == '/v1/redirect-target' for call in self.lm.calls))
 
     def test_openai_proxy_streams_before_upstream_finishes(self):
         first_received = threading.Event()
         chunks = []
-        with patch.dict(os.environ, {'LM_STUDIO_OPENAI_PROXY': '1'}):
-            request = urllib.request.Request(self.app_url + '/v1/responses', data=b'{"stream":true}', headers={'Content-Type': 'application/json'})
+        with patch.dict(os.environ, {'LM_STUDIO_OPENAI_PROXY': '1', 'LM_STUDIO_API_KEY': 'stream-token'}):
+            request = urllib.request.Request(self.app_url + '/v1/responses', data=b'{"stream":true}', headers={'Content-Type': 'application/json', 'Authorization': 'Bearer stream-token'})
             with urllib.request.urlopen(request, timeout=5) as response:
                 def read_first():
                     chunks.append(response.read(len(b'data: first\n\n')))
@@ -361,9 +364,9 @@ class LMStudioTest(unittest.TestCase):
                 self.assertEqual(response.read(), b'data: [DONE]\n\n')
 
     def test_openai_proxy_rejects_oversized_request_without_forwarding(self):
-        with patch.dict(os.environ, {'LM_STUDIO_OPENAI_PROXY': '1'}):
+        with patch.dict(os.environ, {'LM_STUDIO_OPENAI_PROXY': '1', 'LM_STUDIO_API_KEY': 'server-token'}):
             connection = http.client.HTTPConnection('127.0.0.1', self.app.server_port, timeout=5)
-            connection.request('POST', '/v1/embeddings', body=b'', headers={'Content-Length': str(16 * 1024 * 1024 + 1)})
+            connection.request('POST', '/v1/embeddings', body=b'', headers={'Content-Length': str(16 * 1024 * 1024 + 1), 'Authorization': 'Bearer server-token'})
             response = connection.getresponse()
             self.assertEqual(response.status, 413)
             response.read()

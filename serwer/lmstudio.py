@@ -22,6 +22,8 @@ MESSAGES = {
     'model': 'LM Studio nie znalazło modelu lub endpointu API. Sprawdź adres, odśwież listę i wczytaj model.',
     'rejected': 'LM Studio odrzuciło żądanie. Sprawdź wybrany model i ustawienia serwera.',
     'response': 'LM Studio zwróciło nieprawidłową odpowiedź. Sprawdź wersję i ustawienia serwera.',
+    'proxy': 'Przekazywanie endpointów modelu jest wyłączone. Ustaw LM_STUDIO_OPENAI_PROXY=1 i PROXY_TOKEN, żeby je włączyć.',
+    'proxy_auth': 'Przekazywanie endpointów modelu wymaga nagłówka Authorization z PROXY_TOKEN.',
 }
 
 # Komunikaty dla PROVIDER=workers (Cloudflare). Nie wspominają o LM Studio, żeby nie mylić z lokalnym serwerem.
@@ -33,6 +35,8 @@ WORKER_MESSAGES = {
     'model': 'Worker Cloudflare nie znalazło modelu lub endpointu /v1/models. Sprawdź CLOUDFLARE_WORKERS_MODEL i adres workera.',
     'rejected': 'Worker Cloudflare odrzucił żądanie. Sprawdź wybrany model i zmienne workera.',
     'response': 'Worker Cloudflare zwrócił nieprawidłową odpowiedź. Sprawdź kod workera i jego logi.',
+    'proxy': 'Przekazywanie endpointów modelu jest wyłączone. Ustaw LM_STUDIO_OPENAI_PROXY=1 i PROXY_TOKEN, żeby je włączyć.',
+    'proxy_auth': 'Przekazywanie endpointów modelu wymaga nagłówka Authorization z PROXY_TOKEN.',
 }
 
 
@@ -75,7 +79,12 @@ def base_url(value):
         raise LMStudioError('config')
 
 def server_id(value):
-    return hashlib.sha256(base_url(value).encode()).hexdigest()[:16]
+    """Identyfikator serwera modelu zamiast adresu: sha256, a bez `hashlib.sha256` zgodnie z FIPS."""
+    adres = base_url(value).encode()
+    try:
+        return hashlib.sha256(adres).hexdigest()[:16]
+    except (ValueError, TypeError):
+        return hashlib.new('sha256', adres).hexdigest()[:16]
 
 def valid_model(value):
     return isinstance(value, str) and bool(value) and value == value.strip() and len(value) <= 256 and not any(unicodedata.category(char).startswith('C') for char in value)

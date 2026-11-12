@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Pętla agenta: Claude (Haiku) + narzędzia. Bezstanowa: klient przechowuje historię rozmowy i stan świata."""
 import json, os, re, time, copy, urllib.request, urllib.error, html
-import dane, akcje, persony, tlumacz, threading, lmstudio
+import dane, akcje, persony, tlumacz, threading, lmstudio, ustawienia
 _JEZ = threading.local()
 from narzedzia import WSZYSTKIE, NAZWY_ODCZYTOW, NAZWY_AKCJI, NAZWY_UI, NAZWY_KLIENT
 
@@ -201,13 +201,10 @@ OPENAI_BAZA_DOMYSLNA = 'https://api.openai.com/v1'
 ZGODNY_BAZA = (os.environ.get('OPENAI_BASE_URL') or OPENAI_BAZA_DOMYSLNA).rstrip('/')
 ZGODNY_MODEL = (os.environ.get('MODEL') or '') if PROVIDER == 'zgodny' else ''
 ZGODNY_MAX = int(os.environ.get('MODEL_MAX_TOKENS') or 1500)
-ZGODNY_TIMEOUT = int(os.environ.get('MODEL_TIMEOUT') or 120)
+ZGODNY_TIMEOUT = ustawienia._liczba('MODEL_TIMEOUT', ustawienia.CZAS_ROZMOWY, najwyzej=ustawienia.LIMIT_ZADANIA)
 LM_STUDIO_BASE_URL = os.environ.get('LM_STUDIO_BASE_URL') or 'http://127.0.0.1:1234/v1'
 LM_STUDIO_MODEL = (os.environ.get('LM_STUDIO_MODEL') or os.environ.get('MODEL') or '').strip()
-try:
-    LM_STUDIO_TIMEOUT = max(1, min(int(os.environ.get('LM_STUDIO_TIMEOUT') or 180), 600))
-except ValueError:
-    LM_STUDIO_TIMEOUT = 180
+LM_STUDIO_TIMEOUT = ustawienia._liczba('LM_STUDIO_TIMEOUT', ustawienia.CZAS_ROZMOWY, najwyzej=ustawienia.LIMIT_ZADANIA)
 MYSLI = re.compile(r'(?s)<think>.*?</think>\s*')
 
 # --- PROVIDER=workers: Cloudflare Workers AI (API zgodne z OpenAI) ---
@@ -217,10 +214,7 @@ MYSLI = re.compile(r'(?s)<think>.*?</think>\s*')
 WORKERS_BASE_URL = (os.environ.get('CLOUDFLARE_WORKERS_URL') or '').strip()
 WORKERS_TOKEN = (os.environ.get('CLOUDFLARE_WORKERS_TOKEN') or '').strip()
 WORKERS_MODEL = (os.environ.get('CLOUDFLARE_WORKERS_MODEL') or os.environ.get('MODEL') or '').strip()
-try:
-    WORKERS_TIMEOUT = max(1, min(int(os.environ.get('CLOUDFLARE_WORKERS_TIMEOUT') or 120), 600))
-except ValueError:
-    WORKERS_TIMEOUT = 120
+WORKERS_TIMEOUT = ustawienia._liczba('CLOUDFLARE_WORKERS_TIMEOUT', ustawienia.CZAS_ROZMOWY, najwyzej=ustawienia.LIMIT_ZADANIA)
 WORKERS_CONFIG_HINT = 'Brak adresu workera. Ustaw CLOUDFLARE_WORKERS_URL (np. https://mobywatels-workers-ai.twoj-subdomen.workers.dev/v1) w .env po stronie serwera.'
 
 def _id9(x):
@@ -435,7 +429,7 @@ def popraw_jezyk(text, keys, log):
                         input=text, max_output_tokens=600, store=False, reasoning={'effort': 'low'})
             if OPENAI_TIER: body['service_tier'] = OPENAI_TIER
             req = urllib.request.Request('https://api.openai.com/v1/responses', data=json.dumps(body).encode(), headers={'Authorization': 'Bearer ' + keys['openai'], 'Content-Type': 'application/json'})
-            with urllib.request.urlopen(req, timeout=30) as r: out = json.loads(r.read())
+            with urllib.request.urlopen(req, timeout=ustawienia.CZAS_TLUMACZENIA) as r: out = json.loads(r.read())
             fixed = ''.join(p.get('text', '') for it in out.get('output', []) if it.get('type') == 'message' for p in it.get('content', []) if p.get('type') in ('output_text', 'text')).strip()
         else:
             fixed = ''

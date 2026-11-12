@@ -54,6 +54,7 @@ async function checkAxe(page) {
 
 test('tłumacz pisma pokazuje cytowane fakty i nie wymyśla terminu, a panel działa z klawiaturą', async ({ page }) => {
   await open(page);
+  page.on('dialog', dialog => dialog.accept());
   await page.route('**/api/letter/explain', route => route.fulfill({ json: { result: {
     meaning: { text: 'Urząd prosi o wyjaśnienie sprawy.', source: 'Prosimy o złożenie wyjaśnień.' },
     actions: [{ text: 'Przygotuj i złóż wyjaśnienia.', source: 'Prosimy o złożenie wyjaśnień.', kind: 'fact' }],
@@ -147,7 +148,7 @@ test('uproszczone menu nie usuwa dokumentów ani pozostałych usług', async ({ 
   await page.locator('#homeSenior').check();
   await expect(page.locator('#seniorTasksTitle')).toBeVisible();
   await expect(page.locator('#seniorDocuments')).toBeVisible();
-  await page.locator('.more-services summary').click();
+  await page.locator('.more-services summary', { hasText: 'Więcej usług' }).click();
   await expect(page.locator('#seniorReminders')).toBeVisible();
   await expect(page.locator('#seniorHelp')).toBeVisible();
   await page.locator('#seniorReminders').click();
